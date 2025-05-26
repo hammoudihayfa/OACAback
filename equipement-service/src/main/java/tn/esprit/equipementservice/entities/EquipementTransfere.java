@@ -1,31 +1,39 @@
 package tn.esprit.equipementservice.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.Date;
-
 @Entity
-@Data
 public class EquipementTransfere {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idEquipementTransfere;
-    @ManyToOne(cascade = CascadeType.ALL)
+
+    @ManyToOne
     @JoinColumn(name = "equipement_id")
+    @JsonBackReference
     private EquipementInformatique equipement;
 
+    private String ancienProprietaire;
+    private String matricule;
     private Date dateTransfert;
     private String commentaires;
+
     public EquipementTransfere() {
     }
 
-    public EquipementTransfere(Long idEquipementTransfere, EquipementInformatique equipement, Date dateTransfert, String commentaires) {
+    public EquipementTransfere(Long idEquipementTransfere, EquipementInformatique equipement, String ancienProprietaire, String matricule, Date dateTransfert, String commentaires) {
         this.idEquipementTransfere = idEquipementTransfere;
         this.equipement = equipement;
+        this.ancienProprietaire = ancienProprietaire;
+        this.matricule = matricule;
         this.dateTransfert = dateTransfert;
         this.commentaires = commentaires;
     }
+
     public Long getIdEquipementTransfere() {
         return idEquipementTransfere;
     }
@@ -45,6 +53,23 @@ public class EquipementTransfere {
 
     public Date getDateTransfert() {
         return dateTransfert;
+    }
+
+    public String getAncienProprietaire() {
+        return ancienProprietaire;
+    }
+
+
+    public String getMatricule() {
+        return matricule;
+    }
+
+    public void setMatricule(String matricule) {
+        this.matricule = matricule;
+    }
+
+    public void setAncienProprietaire(String ancienProprietaire) {
+        this.ancienProprietaire = ancienProprietaire;
     }
 
     public void setDateTransfert(Date dateTransfert) {

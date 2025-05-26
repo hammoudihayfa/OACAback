@@ -27,7 +27,7 @@ public class EquipementMaintenanceService {
 
             return new EquipementMaintenanceDTO(
                     equipement.getIdEquipementEnPanne(),
-                    equipement.getNomEquipement(),
+                    null,
                     maintenanceDTO.getIdProgrammeMaintenance(),
                     maintenanceDTO.getNomProgramme(),
                     maintenanceDTO.getDateMaintenance()
@@ -36,4 +36,5 @@ public class EquipementMaintenanceService {
 
         return null;
     }
+
 }

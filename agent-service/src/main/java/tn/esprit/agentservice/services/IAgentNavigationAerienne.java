@@ -18,4 +18,5 @@ public interface IAgentNavigationAerienne {
     void affecterEquipementAAgent(Long matricule, Long idEquipement);
 
     List<ListeEquipementsParAgent> getEquipementsAffectes(Long matricule);
+    List<AgentNavigationAerienne> getAgentsByNom(String nom);
 }

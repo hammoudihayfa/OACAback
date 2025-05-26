@@ -84,4 +84,10 @@ public class ListeEquipementService implements IListeEquipement{
         }
         return null;
     }
+
+    @Override
+    public List<ListeEquipementsParAgent> findByMarque(String marque) {
+        return listeEquipementRepository.findByMarque(marque);
+
+    }
 }

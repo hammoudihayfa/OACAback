@@ -1,5 +1,6 @@
 package tn.esprit.equipementservice.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -7,77 +8,90 @@ import org.springframework.web.bind.annotation.*;
 import tn.esprit.equipementservice.DTO.ListeLogicielDTO;
 import tn.esprit.equipementservice.entities.EquipementEnPanne;
 import tn.esprit.equipementservice.entities.EquipementInformatique;
-import tn.esprit.equipementservice.entities.HistoriqueMouvement;
 import tn.esprit.equipementservice.services.IEquipement;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/equipements")
-
+@CrossOrigin(origins = "*")
 public class EquipementController {
-@Autowired
-    private final IEquipement iEquipement;
-    @GetMapping("/{id}/logiciels")
-    public List<ListeLogicielDTO> getLogiciels(@PathVariable("id") Long id) {
-        return iEquipement.getLogicielsParEquipement(id);
-    }
 
+    private final IEquipement iEquipement;
+
+    @Autowired
     public EquipementController(IEquipement iEquipement) {
         this.iEquipement = iEquipement;
     }
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @GetMapping("/{id}/logiciels")
+    public ResponseEntity<List<ListeLogicielDTO>> getLogiciels(@PathVariable("id") Long id) {
+        List<ListeLogicielDTO> logiciels = iEquipement.getLogicielsParEquipement(id);
+        return ResponseEntity.ok()
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                .body(logiciels);
+    }
+
     @GetMapping("/agent/{matricule}")
-    public List<EquipementInformatique> getEquipementsByAgent(@PathVariable int matricule) {
-        return iEquipement.getEquipementsByMatricule(matricule);
+    public ResponseEntity<List<EquipementInformatique>> getEquipementsByAgent(@PathVariable int matricule) {
+        List<EquipementInformatique> equipements = iEquipement.getEquipementsByMatricule(matricule);
+        return ResponseEntity.ok()
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                .body(equipements);
     }
 
     @PostMapping
-    public ResponseEntity<String> ajouterEquipement(@RequestBody EquipementInformatique equipement) {
-        iEquipement.ajouterEquipement(equipement);
-        return ResponseEntity.ok("Équipement ajouté avec succès");
+    public ResponseEntity<EquipementInformatique> ajouterEquipement(@RequestBody EquipementInformatique equipement) {
+        System.out.println("Received equipement: " + equipement);
+        EquipementInformatique savedEquipement = iEquipement.ajouterEquipement(equipement);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedEquipement);
     }
+
 
     @GetMapping
     public ResponseEntity<List<EquipementInformatique>> getAllEquipements() {
         List<EquipementInformatique> equipements = iEquipement.listeEquipements();
-        return new ResponseEntity<>(equipements, HttpStatus.OK);
+        return ResponseEntity.ok()
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                .body(equipements);
     }
 
     @GetMapping("/{numeroPatrimoine}")
     public ResponseEntity<EquipementInformatique> getEquipementById(@PathVariable Long numeroPatrimoine) {
         Optional<EquipementInformatique> equipement = iEquipement.getEquipementById(numeroPatrimoine);
-        if (equipement.isPresent()) {
-            return new ResponseEntity<>(equipement.get(), HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        return equipement.map(e -> ResponseEntity.ok().body(e))
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
-    @PutMapping("/{numeroPatrimoine}")
+    @PutMapping(value = "/update/{numeroPatrimoine}", consumes = "application/json", produces = "application/json")
     public ResponseEntity<EquipementInformatique> updateEquipement(
             @PathVariable Long numeroPatrimoine, @RequestBody EquipementInformatique equipement) {
         EquipementInformatique updatedEquipement = iEquipement.updateEquipement(numeroPatrimoine, equipement);
         if (updatedEquipement != null) {
-            return new ResponseEntity<>(updatedEquipement, HttpStatus.OK);
+            return ResponseEntity.ok().body(updatedEquipement);
         } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
 
     @DeleteMapping("/{numeroPatrimoine}")
     public ResponseEntity<Void> deleteEquipement(@PathVariable Long numeroPatrimoine) {
         iEquipement.deleteEquipement(numeroPatrimoine);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return ResponseEntity.noContent().build();
     }
-    @GetMapping("/{matricule}/qr-code")
-    public ResponseEntity<byte[]> generateQRCode(@PathVariable int matricule) {
-        try {
-            BufferedImage qrCodeImage = iEquipement.genererQRCode(matricule);
 
+    @GetMapping("/{numeroSerie}/qr-code")
+    public ResponseEntity<byte[]> generateQRCode(@PathVariable String numeroSerie) {
+        try {
+            BufferedImage qrCodeImage = iEquipement.genererQRCode(numeroSerie);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ImageIO.write(qrCodeImage, "PNG", baos);
             byte[] qrCodeBytes = baos.toByteArray();
@@ -86,31 +100,96 @@ public class EquipementController {
                     .header("Content-Type", "image/png")
                     .body(qrCodeBytes);
         } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
     @PostMapping("/{equipementId}/declare-panne")
     public ResponseEntity<EquipementEnPanne> declarePanne(@PathVariable Long equipementId, @RequestBody String descriptionPanne) {
         EquipementEnPanne panne = iEquipement.declarePanne(equipementId, descriptionPanne);
-        return new ResponseEntity<>(panne, HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED).body(panne);
     }
 
-    // Obtenir l'historique des pannes
     @GetMapping("/{equipementId}/pannes")
-    public List<EquipementEnPanne> getPannesByEquipement(@PathVariable Long equipementId) {
-        return iEquipement.getPannesByEquipement(equipementId);
+    public ResponseEntity<List<EquipementEnPanne>> getPannesByEquipement(@PathVariable Long equipementId) {
+        List<EquipementEnPanne> pannes = iEquipement.getPannesByEquipement(equipementId);
+        return ResponseEntity.ok()
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                .body(pannes);
     }
 
-    // Ajouter un mouvement
-    @PostMapping("/{equipementId}/mouvements")
-    public ResponseEntity<HistoriqueMouvement> ajouterMouvement(@PathVariable Long equipementId, @RequestBody String typeMouvement) {
-        HistoriqueMouvement mouvement = iEquipement.ajouterMouvement(equipementId, typeMouvement);
-        return new ResponseEntity<>(mouvement, HttpStatus.CREATED);
+
+
+    @GetMapping("/modele/{modele}")
+    public ResponseEntity<List<EquipementInformatique>> getEquipementsByModele(@PathVariable String modele) {
+        List<EquipementInformatique> equipements = iEquipement.getEquipementsByModele(modele);
+        return ResponseEntity.ok()
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                .body(equipements);
+    }
+    @GetMapping("/total-equipment")
+    public long getTotalEquipement() {
+        return iEquipement.getTotalEquipement();
     }
 
-    // Obtenir l'historique des mouvements
-    @GetMapping("/{equipementId}/mouvements")
-    public List<HistoriqueMouvement> getHistoriqueMouvements(@PathVariable Long equipementId) {
-        return iEquipement.getHistoriqueMouvements(equipementId);
+    @GetMapping("/active-equipment")
+    public long getActiveEquipement() {
+        return iEquipement.getActiveEquipement();
     }
+
+    @GetMapping("/maintenance-equipment")
+    public long getMaintenanceEquipement() {
+        return iEquipement.getMaintenanceEquipement();
+    }
+
+    @GetMapping("/inactive-equipment")
+    public long getInactiveEquipement() {
+        return iEquipement.getInactiveEquipement();
+    }
+    // Statistiques mensuelles par état pour une année donnée
+    @GetMapping("/stats/monthly-status/{year}")
+    public ResponseEntity<Map<String, Map<String, Long>>> getMonthlyStatusByYear(@PathVariable int year) {
+        return ResponseEntity.ok(iEquipement.getMonthlyStatusByYear(year));
+    }
+
+    // Nombre d’équipements par type
+    @GetMapping("/stats/count-by-type")
+    public ResponseEntity<Map<String, Long>> getEquipementCountByType() {
+        return ResponseEntity.ok(iEquipement.getEquipementCountByType());
+    }
+
+    // Taux de panne par marque
+    @GetMapping("/stats/failure-rate-by-brand")
+    public ResponseEntity<Map<String, Double>> getFailureRateByBrand() {
+        return ResponseEntity.ok(iEquipement.getFailureRateByBrand());
+    }
+
+    // Nombre d’équipements par localisation
+    @GetMapping("/stats/count-by-location")
+    public ResponseEntity<Map<String, Long>> getEquipementCountByLocation() {
+        return ResponseEntity.ok(iEquipement.getEquipementCountByLocation());
+    }
+
+    // Âge moyen des équipements par type
+    @GetMapping("/stats/average-age-by-type")
+    public ResponseEntity<Map<String, Double>> getAverageAgeByType() {
+        return ResponseEntity.ok(iEquipement.getAverageAgeByType());
+    }
+
+    // Tendance d’acquisition par mois pour une année donnée
+    @GetMapping("/stats/acquisition-trend/{year}")
+    public ResponseEntity<Map<String, Long>> getAcquisitionTrend(@PathVariable int year) {
+        return ResponseEntity.ok(iEquipement.getAcquisitionTrend(year));
+    }
+    @GetMapping("/filtered")
+    public ResponseEntity<List<EquipementInformatique>> getEquipementsByFilters(
+            @RequestParam(required = false) String location,
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) Integer year) {
+
+        List<EquipementInformatique> equipements = iEquipement.getEquipementsByFilters(location, type, year);
+        return ResponseEntity.ok().body(equipements);
+    }
+
+
 }

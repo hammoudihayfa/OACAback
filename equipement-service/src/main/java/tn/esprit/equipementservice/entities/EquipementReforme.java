@@ -1,33 +1,38 @@
 package tn.esprit.equipementservice.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Data;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.Date;
-
 @Entity
-@Data
 public class EquipementReforme {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idEquipementReforme;
-    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "equipement_id")
-    private EquipementInformatique equipement;
 
     private Date dateReforme;
     private String description;
 
+    @ManyToOne
+    @JoinColumn(name = "equipement_id")
+    private EquipementInformatique equipement;
+
+
+
     public EquipementReforme() {
     }
 
-    public EquipementReforme(Long idEquipementReforme, EquipementInformatique equipement, Date dateReforme, String description) {
+    public EquipementReforme(Long idEquipementReforme, Date dateReforme, String description, EquipementInformatique equipement) {
         this.idEquipementReforme = idEquipementReforme;
-        this.equipement = equipement;
         this.dateReforme = dateReforme;
         this.description = description;
+        this.equipement = equipement;
     }
 
+    // Getters and Setters...
     public Long getIdEquipementReforme() {
         return idEquipementReforme;
     }
@@ -43,6 +48,7 @@ public class EquipementReforme {
     public void setEquipement(EquipementInformatique equipement) {
         this.equipement = equipement;
     }
+
 
     public Date getDateReforme() {
         return dateReforme;
@@ -60,7 +66,6 @@ public class EquipementReforme {
         this.description = description;
     }
 
-    // ToString
     @Override
     public String toString() {
         return "EquipementReforme{" +
@@ -70,5 +75,4 @@ public class EquipementReforme {
                 ", description='" + description + '\'' +
                 '}';
     }
-
 }

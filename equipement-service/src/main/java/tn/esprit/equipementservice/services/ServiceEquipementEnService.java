@@ -48,4 +48,10 @@ public class ServiceEquipementEnService implements IEquipementEnService {
     public List<EquipementEnService> obtenirTousLesEquipementsEnService() {
         return equipementEnServiceRepository.findAll();
     }
+
+    @Override
+    public Optional<EquipementEnService> obtenirEquipementParNumeroPatrimoine(Long numeroPatrimoine) {
+        return equipementEnServiceRepository.findByEquipementIdEquipement(numeroPatrimoine);
+
+    }
 }

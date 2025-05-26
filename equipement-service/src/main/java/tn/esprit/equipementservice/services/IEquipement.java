@@ -7,6 +7,7 @@ import tn.esprit.equipementservice.entities.HistoriqueMouvement;
 
 import java.awt.image.BufferedImage;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public interface IEquipement {
@@ -20,18 +21,29 @@ public interface IEquipement {
     EquipementInformatique updateEquipement(Long numeroPatrimoine, EquipementInformatique equipement);
 
     void deleteEquipement(Long numeroPatrimoine);
-    BufferedImage genererQRCode(int matricule) throws Exception;
-    // Déclaration d'une panne
+    public BufferedImage genererQRCode(String numeroSerie) throws Exception ;
     EquipementEnPanne declarePanne(Long equipementId, String descriptionPanne);
 
-    // Historique des pannes
     List<EquipementEnPanne> getPannesByEquipement(Long equipementId);
 
-    // Ajouter un mouvement d'équipement
     HistoriqueMouvement ajouterMouvement(Long equipementId, String typeMouvement);
 
-    // Historique des mouvements
-    List<HistoriqueMouvement> getHistoriqueMouvements(Long equipementId);
+    List<EquipementInformatique> getEquipementsByModele(String modele);
+
+
+    long getTotalEquipement();
+    long getActiveEquipement() ;
+
+    long getMaintenanceEquipement() ;
+
+    long getInactiveEquipement() ;
+    Map<String, Map<String, Long>> getMonthlyStatusByYear(int year);
+    Map<String, Long> getEquipementCountByType();
+    Map<String, Double> getFailureRateByBrand();
+    Map<String, Long> getEquipementCountByLocation();
+    Map<String, Double> getAverageAgeByType();
+    Map<String, Long> getAcquisitionTrend(int year);
+    List<EquipementInformatique> getEquipementsByFilters(String location, String type, Integer year);
 
 
 }

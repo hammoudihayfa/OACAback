@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tn.esprit.equipementservice.entities.EquipementEnPanne;
 import tn.esprit.equipementservice.repositories.EquipementEnPanneRepository;
+import tn.esprit.equipementservice.repositories.EquipementRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -14,6 +15,8 @@ import java.util.Optional;
 public class EquipementPanneService implements IEquipementEnPanne{
     @Autowired
     private EquipementEnPanneRepository equipementEnPanneRepository;
+    @Autowired
+    private EquipementRepository equipementRepository;
 
     @Override
     public EquipementEnPanne ajouterEquipementEnPanne(EquipementEnPanne equipementEnPanne) {
@@ -42,5 +45,13 @@ public class EquipementPanneService implements IEquipementEnPanne{
     @Override
     public void deleteEquipementEnPanne(Long idEquipementEnPane) {
         equipementEnPanneRepository.deleteById(idEquipementEnPane);
+    }
+    public double getGlobalFailureRate() {
+        long totalEquipements = equipementRepository.count();
+        long totalEnPanne = equipementEnPanneRepository.count();
+
+        if (totalEquipements == 0) return 0.0;
+
+        return (double) totalEnPanne / totalEquipements;
     }
 }

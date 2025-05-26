@@ -30,6 +30,7 @@ public class ApiGatewayApplication {
 				.route("notification", r -> r.path("/notification/**").uri("http://localhost:8082"))
 				.route("liste-equipements", r -> r.path("/liste-equipements/**").uri("http://localhost:8082"))
 				.route("programme-maintenance", r -> r.path("/programme-maintenance/**").uri("http://localhost:8083"))
+				.route("api", r -> r.path("/api/**").uri("http://localhost:8083"))
 				.route("rapports", r -> r.path("/rapports/**").uri("http://localhost:8083"))
 				.route("equipements", r -> r.path("/equipements/**").uri("http://localhost:8081"))
 				.route("equipements-en-panne", r -> r.path("/equipements-en-panne/**").uri("http://localhost:8081"))

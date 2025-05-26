@@ -2,7 +2,9 @@ package tn.esprit.equipementservice.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tn.esprit.equipementservice.entities.EquipementInformatique;
 import tn.esprit.equipementservice.entities.EtatEquipement;
+import tn.esprit.equipementservice.repositories.EquipementRepository;
 import tn.esprit.equipementservice.repositories.EtatEquipementRepository;
 
 import java.util.List;
@@ -14,9 +16,18 @@ public class EquipementEtatService implements IEquipementEtat {
     @Autowired
     private EtatEquipementRepository etatEquipementRepository;
 
-    @Override
-    public EtatEquipement ajouterEtatEquipement(EtatEquipement etatEquipement) {
-        return etatEquipementRepository.save(etatEquipement);
+    @Autowired
+    private EquipementRepository equipementRepository;
+
+    public EtatEquipement ajouterEtatEquipement(EtatEquipement etat) {
+        Optional<EquipementInformatique> equipementOpt = equipementRepository.findById(etat.getEquipement().getIdEquipement());
+
+        if (!equipementOpt.isPresent()) {
+            throw new RuntimeException("Équipement avec ID " + etat.getEquipement().getIdEquipement() + " introuvable.");
+        }
+
+        etat.setEquipement(equipementOpt.get());
+        return etatEquipementRepository.save(etat);
     }
 
     @Override
@@ -38,13 +49,23 @@ public class EquipementEtatService implements IEquipementEtat {
             etat.setEtatEquipementValue(etatEquipements.getEtatEquipementValue());
             etat.setDateEtat(etatEquipements.getDateEtat());
             etat.setMatriculeProprietaire(etatEquipements.getMatriculeProprietaire());
-            etat.setEquipement(etatEquipements.getEquipement());
+            etat.setProprietaire(etatEquipements.getProprietaire());
+
+            Long equipementId = etatEquipements.getEquipement().getIdEquipement();
+            Optional<EquipementInformatique> equipementOpt = equipementRepository.findById(equipementId);
+
+            if (!equipementOpt.isPresent()) {
+                throw new RuntimeException("Équipement avec ID " + equipementId + " introuvable.");
+            }
+
+            etat.setEquipement(equipementOpt.get());
 
             return etatEquipementRepository.save(etat);
         }
 
         return null;
     }
+
 
     @Override
     public void supprimerEtatEquipement(Long idEtatEquipement) {

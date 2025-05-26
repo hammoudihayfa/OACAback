@@ -1,7 +1,9 @@
 package tn.esprit.maintenanceservice.entities;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -10,36 +12,42 @@ public class ProgrammeMaintenance {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idProgrammeMaintenance;
-    private String nomProgramme;
-    private String frequence;
-    @Temporal(TemporalType.DATE)
-    private Date dateDerniereExecution;
+
+    private String planAction;
     private String procedureMaintenance;
     private String actionCorrective;
-    private String description;
+    private String observation;
     private String responsable;
     private String etudeSecurite;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate startDate;
+
+    @Enumerated(EnumType.STRING)
+    private FrequencyType frequencyType;
+
+    private Integer estimatedDurationDays;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate nextDueDate;
     @OneToMany(mappedBy = "programme", cascade = CascadeType.ALL)
     private List<Rapport> rapports;
-
-
     public ProgrammeMaintenance() {
     }
 
-    public ProgrammeMaintenance(String nomProgramme, String frequence, Date dateDerniereExecution,
-                                String procedureMaintenance, String actionCorrective,
-                                String description, String responsable, String etudeSecurite) {
-        this.nomProgramme = nomProgramme;
-        this.frequence = frequence;
-        this.dateDerniereExecution = dateDerniereExecution;
+    public ProgrammeMaintenance(Long idProgrammeMaintenance, String planAction, String procedureMaintenance, String actionCorrective, String observation, String responsable, String etudeSecurite, LocalDate startDate, FrequencyType frequencyType, Integer estimatedDurationDays, LocalDate nextDueDate) {
+        this.idProgrammeMaintenance = idProgrammeMaintenance;
+        this.planAction = planAction;
         this.procedureMaintenance = procedureMaintenance;
         this.actionCorrective = actionCorrective;
-        this.description = description;
+        this.observation = observation;
         this.responsable = responsable;
         this.etudeSecurite = etudeSecurite;
+        this.startDate = startDate;
+        this.frequencyType = frequencyType;
+        this.estimatedDurationDays = estimatedDurationDays;
+        this.nextDueDate = nextDueDate;
     }
-
-
 
     public Long getIdProgrammeMaintenance() {
         return idProgrammeMaintenance;
@@ -49,28 +57,12 @@ public class ProgrammeMaintenance {
         this.idProgrammeMaintenance = idProgrammeMaintenance;
     }
 
-    public String getNomProgramme() {
-        return nomProgramme;
+    public String getPlanAction() {
+        return planAction;
     }
 
-    public void setNomProgramme(String nomProgramme) {
-        this.nomProgramme = nomProgramme;
-    }
-
-    public String getFrequence() {
-        return frequence;
-    }
-
-    public void setFrequence(String frequence) {
-        this.frequence = frequence;
-    }
-
-    public Date getDateDerniereExecution() {
-        return dateDerniereExecution;
-    }
-
-    public void setDateDerniereExecution(Date dateDerniereExecution) {
-        this.dateDerniereExecution = dateDerniereExecution;
+    public void setPlanAction(String planAction) {
+        this.planAction = planAction;
     }
 
     public String getProcedureMaintenance() {
@@ -89,12 +81,12 @@ public class ProgrammeMaintenance {
         this.actionCorrective = actionCorrective;
     }
 
-    public String getDescription() {
-        return description;
+    public String getObservation() {
+        return observation;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setObservation(String observation) {
+        this.observation = observation;
     }
 
     public String getResponsable() {
@@ -111,5 +103,37 @@ public class ProgrammeMaintenance {
 
     public void setEtudeSecurite(String etudeSecurite) {
         this.etudeSecurite = etudeSecurite;
+    }
+
+    public LocalDate getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
+    }
+
+    public FrequencyType getFrequencyType() {
+        return frequencyType;
+    }
+
+    public void setFrequencyType(FrequencyType frequencyType) {
+        this.frequencyType = frequencyType;
+    }
+
+    public Integer getEstimatedDurationDays() {
+        return estimatedDurationDays;
+    }
+
+    public void setEstimatedDurationDays(Integer estimatedDurationDays) {
+        this.estimatedDurationDays = estimatedDurationDays;
+    }
+
+    public LocalDate getNextDueDate() {
+        return nextDueDate;
+    }
+
+    public void setNextDueDate(LocalDate nextDueDate) {
+        this.nextDueDate = nextDueDate;
     }
 }

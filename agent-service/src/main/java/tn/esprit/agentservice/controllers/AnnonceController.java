@@ -10,6 +10,8 @@ import tn.esprit.agentservice.services.AnnonceService;
 import java.util.List;
 
 @RestController
+@CrossOrigin(origins = "*")
+
 @RequestMapping("/annonces")
 
 public class AnnonceController {

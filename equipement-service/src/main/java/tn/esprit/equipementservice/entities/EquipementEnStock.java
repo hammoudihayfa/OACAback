@@ -5,27 +5,28 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.Data;
-
-
 @Entity
-@Data
 public class EquipementEnStock {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idStock;
-    private String nomStock;
-    private String localisation;
+
+    private String typeEquipement;
+    private Long quantite;
+    private Long alerteStock;
+
 
     public EquipementEnStock() {
     }
 
-
-    public EquipementEnStock(Long idStock, String nomStock, String localisation) {
+    public EquipementEnStock(Long idStock, String typeEquipement, Long quantite, Long alerteStock) {
         this.idStock = idStock;
-        this.nomStock = nomStock;
-        this.localisation = localisation;
+        this.typeEquipement = typeEquipement;
+        this.quantite = quantite;
+        this.alerteStock = alerteStock;
     }
 
+    // Getters and Setters...
     public Long getIdStock() {
         return idStock;
     }
@@ -34,29 +35,27 @@ public class EquipementEnStock {
         this.idStock = idStock;
     }
 
-    public String getNomStock() {
-        return nomStock;
+    public String getTypeEquipement() {
+        return typeEquipement;
     }
 
-    public void setNomStock(String nomStock) {
-        this.nomStock = nomStock;
+    public void setTypeEquipement(String typeEquipement) {
+        this.typeEquipement = typeEquipement;
     }
 
-    public String getLocalisation() {
-        return localisation;
+    public Long getQuantite() {
+        return quantite;
     }
 
-    public void setLocalisation(String localisation) {
-        this.localisation = localisation;
+    public void setQuantite(Long quantite) {
+        this.quantite = quantite;
     }
 
-    @Override
-    public String toString() {
-        return "EquipementEnStock{" +
-                "idStock=" + idStock +
-                ", nomStock='" + nomStock + '\'' +
-                ", localisation='" + localisation + '\'' +
-                '}';
+    public Long getAlerteStock() {
+        return alerteStock;
     }
 
+    public void setAlerteStock(Long alerteStock) {
+        this.alerteStock = alerteStock;
+    }
 }

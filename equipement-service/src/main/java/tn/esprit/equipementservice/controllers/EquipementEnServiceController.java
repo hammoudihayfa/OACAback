@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@CrossOrigin(origins = "*")
+
 @RequestMapping("/equipements-en-service")
 
 
@@ -49,5 +51,10 @@ public class EquipementEnServiceController {
     public ResponseEntity<List<EquipementEnService>> obtenirTousLesEquipements() {
         List<EquipementEnService> equipements = equipementEnService.obtenirTousLesEquipementsEnService();
         return ResponseEntity.ok(equipements);
+    }
+    @GetMapping("/numero-patrimoine/{numeroPatrimoine}")
+    public ResponseEntity<EquipementEnService> obtenirEquipementParNumeroPatrimoine(@PathVariable Long numeroPatrimoine) {
+        Optional<EquipementEnService> equipement = equipementEnService.obtenirEquipementParNumeroPatrimoine(numeroPatrimoine);
+        return equipement.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 }

@@ -5,10 +5,9 @@ public class EmailRequest {
     private String subject;
     private String text;
 
-    // Constructeur par défaut
     public EmailRequest() {}
 
-    // Constructeur avec paramètres
+
     public EmailRequest(String to, String subject, String text) {
         this.to = to;
         this.subject = subject;

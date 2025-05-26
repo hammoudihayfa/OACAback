@@ -7,7 +7,7 @@ import tn.esprit.equipementservice.entities.EquipementEnPanne;
 import java.util.List;
 
 @Repository
-public interface EquipementEnPanneRepository extends JpaRepository<EquipementEnPanne,Long> {
-    public List<EquipementEnPanne> findByEquipementNumeroPatrimoine(Long numeroPatrimoine);
-
+public interface EquipementEnPanneRepository extends JpaRepository<EquipementEnPanne, Long> {
+    List<EquipementEnPanne> findByEquipement_IdEquipement(Long equipementId);
+    void deleteByEquipement_IdEquipement(Long equipementId);
 }

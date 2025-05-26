@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@CrossOrigin(origins = "*")
+
 @RequestMapping("/liste-equipements")
 @AllArgsConstructor
 public class ListeEquipementController {
@@ -68,4 +70,10 @@ public class ListeEquipementController {
         ListeEquipementsParAgent equipement = listeEquipementService.changerStatutEquipement(idEquipement, nouveauStatut);
         return equipement != null ? ResponseEntity.ok(equipement) : ResponseEntity.notFound().build();
     }
+    @GetMapping("/marque/{marque}")
+    public ResponseEntity<List<ListeEquipementsParAgent>> getEquipementsParMarque(@PathVariable String marque) {
+        List<ListeEquipementsParAgent> equipements = listeEquipementService.findByMarque(marque);
+        return new ResponseEntity<>(equipements, HttpStatus.OK);
+    }
+
 }

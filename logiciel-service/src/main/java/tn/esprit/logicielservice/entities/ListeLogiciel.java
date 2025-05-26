@@ -17,18 +17,18 @@ public class ListeLogiciel {
     private String numeroLicence;
     private String contrat;
     private Date dateLimite;
-    private Long equipementId;
+
 
     public ListeLogiciel() {
     }
 
-    public ListeLogiciel(String nomLogiciel, String version, String numeroLicence, String contrat, Date dateLimite, Long equipementId) {
+    public ListeLogiciel(String nomLogiciel, String version, String numeroLicence, String contrat, Date dateLimite) {
         this.nomLogiciel = nomLogiciel;
         this.version = version;
         this.numeroLicence = numeroLicence;
         this.contrat = contrat;
         this.dateLimite = dateLimite;
-        this.equipementId = equipementId;
+
     }
 
     public Long getIdLogiciel() {
@@ -78,12 +78,6 @@ public class ListeLogiciel {
     public void setDateLimite(Date dateLimite) {
         this.dateLimite = dateLimite;
     }
-    public Long getEquipementId() {
-        return equipementId;
-    }
 
-    public void setEquipementId(Long equipementId) {
-        this.equipementId = equipementId;
-    }
 
 }

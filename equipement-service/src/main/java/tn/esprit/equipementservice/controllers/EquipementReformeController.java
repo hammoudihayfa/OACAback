@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@CrossOrigin(origins = "*")
+
 @RequestMapping("/equipementsReformes")
 public class EquipementReformeController {
     @Autowired
@@ -55,5 +57,11 @@ public class EquipementReformeController {
         } catch (RuntimeException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+    }
+    @GetMapping("/numeroPatrimoine/{numeroPatrimoine}")
+    public ResponseEntity<EquipementReforme> getEquipementReformeByNumeroPatrimoine(@PathVariable Long numeroPatrimoine) {
+        Optional<EquipementReforme> equipementReforme = equipementEnReformeService.getEquipementReformeByNumeroPatrimoine(numeroPatrimoine);
+        return equipementReforme.map(ResponseEntity::ok)
+                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 }

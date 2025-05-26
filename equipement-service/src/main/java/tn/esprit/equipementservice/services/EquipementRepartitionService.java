@@ -22,8 +22,8 @@ public class EquipementRepartitionService implements IEquipementRepartition{
     @Transactional
     public EquipementRepartition createEquipementRepartition(EquipementRepartition equipementRepartition) {
         EquipementInformatique equipement = equipementRepartition.getEquipement();
-        if (equipement != null && equipement.getNumeroPatrimoine() != null) {
-            equipement = equipementInformatiqueRepository.findById(equipement.getNumeroPatrimoine())
+        if (equipement != null && equipement.getIdEquipement() != null) {
+            equipement = equipementInformatiqueRepository.findById(equipement.getIdEquipement())
                     .orElseThrow(() -> new EntityNotFoundException("Equipement not found"));
         }
         return equipementRepartitionRepository.save(equipementRepartition);
@@ -39,11 +39,17 @@ public class EquipementRepartitionService implements IEquipementRepartition{
         return equipementRepartitionRepository.findById(idEquipementRepartition);
     }
 
-    @Override
-    public EquipementRepartition updateEquipementRepartition(Long idEquipementRepartition, EquipementRepartition equipementRepartition) {
-        if (equipementRepartitionRepository.existsById(idEquipementRepartition)) {
-            equipementRepartition.setIdEquipementRepartition(idEquipementRepartition);
-            return equipementRepartitionRepository.save(equipementRepartition);
+    public EquipementRepartition updateEquipementRepartition(Long id, EquipementRepartition updatedRepartition) {
+        Optional<EquipementRepartition> existingRepartition = equipementRepartitionRepository.findById(id);
+        if (existingRepartition.isPresent()) {
+            EquipementRepartition repartitionToUpdate = existingRepartition.get();
+            repartitionToUpdate.setEquipement(updatedRepartition.getEquipement());
+            repartitionToUpdate.setLocalisation(updatedRepartition.getLocalisation());
+            repartitionToUpdate.setUniteResponsable(updatedRepartition.getUniteResponsable());
+            repartitionToUpdate.setDateDebut(updatedRepartition.getDateDebut());
+            repartitionToUpdate.setDateFin(updatedRepartition.getDateFin());
+
+            return equipementRepartitionRepository.save(repartitionToUpdate);
         }
         return null;
     }

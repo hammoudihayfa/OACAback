@@ -9,10 +9,9 @@ import java.util.List;
 
 @Repository
 public interface ProgrammeMaintenanceRepository extends JpaRepository<ProgrammeMaintenance,Long> {
-    public List<ProgrammeMaintenance> findByDateDerniereExecutionBefore(Date date);
     List<ProgrammeMaintenance> findByResponsable(String responsable);
-    long countByDateDerniereExecutionBetween(Date startDate, Date endDate);
 
+    List<ProgrammeMaintenance> findByResponsableContainingIgnoreCase(String responsable);
 
 
 }

@@ -1,7 +1,12 @@
 package tn.esprit.equipementservice.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 public class EquipementEnPanne {
@@ -9,15 +14,36 @@ public class EquipementEnPanne {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idEquipementEnPanne;
 
-    @ManyToOne(cascade = CascadeType.PERSIST)
+    @ManyToOne
     @JoinColumn(name = "equipement_id")
+    @JsonIgnore
+
     private EquipementInformatique equipement;
 
     private Date datePanne;
     private String description;
     private String statut;
-    private int matriculeDeclarant;
+    private String priorite;
+    private String typeDePanne;
     private Long idProgrammeMaintenance;
+    @OneToMany(mappedBy = "equipementPanne", cascade = CascadeType.ALL)
+    private List<HistoriquePanne> historique = new ArrayList<>();
+
+    public EquipementEnPanne() {
+    }
+
+    public EquipementEnPanne(Long idEquipementEnPanne, EquipementInformatique equipement, Date datePanne, String description, String statut, String priorite, String typeDePanne, Long idProgrammeMaintenance) {
+        this.idEquipementEnPanne = idEquipementEnPanne;
+        this.equipement = equipement;
+        this.datePanne = datePanne;
+        this.description = description;
+        this.statut = statut;
+        this.priorite = priorite;
+        this.typeDePanne = typeDePanne;
+        this.idProgrammeMaintenance = idProgrammeMaintenance;
+    }
+
+    // Getters and Setters...
     public Long getIdEquipementEnPanne() {
         return idEquipementEnPanne;
     }
@@ -26,6 +52,21 @@ public class EquipementEnPanne {
         this.idEquipementEnPanne = idEquipementEnPanne;
     }
 
+    public String getPriorite() {
+        return priorite;
+    }
+
+    public void setPriorite(String priorite) {
+        this.priorite = priorite;
+    }
+
+    public String getTypeDePanne() {
+        return typeDePanne;
+    }
+
+    public void setTypeDePanne(String typeDePanne) {
+        this.typeDePanne = typeDePanne;
+    }
 
     public EquipementInformatique getEquipement() {
         return equipement;
@@ -33,10 +74,6 @@ public class EquipementEnPanne {
 
     public void setEquipement(EquipementInformatique equipement) {
         this.equipement = equipement;
-    }
-
-    public String getNomEquipement() {
-        return equipement != null ? equipement.getNom() : null;
     }
 
     public Date getDatePanne() {
@@ -63,13 +100,6 @@ public class EquipementEnPanne {
         this.statut = statut;
     }
 
-    public int getMatriculeDeclarant() {
-        return matriculeDeclarant;
-    }
-
-    public void setMatriculeDeclarant(int matriculeDeclarant) {
-        this.matriculeDeclarant = matriculeDeclarant;
-    }
 
     public Long getIdProgrammeMaintenance() {
         return idProgrammeMaintenance;
@@ -78,4 +108,6 @@ public class EquipementEnPanne {
     public void setIdProgrammeMaintenance(Long idProgrammeMaintenance) {
         this.idProgrammeMaintenance = idProgrammeMaintenance;
     }
+
+   
 }

@@ -8,8 +8,8 @@ public class Annonce {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idAnnonce;
-
     private String titre;
+
     private String description;
     private LocalDate datePublication;
 

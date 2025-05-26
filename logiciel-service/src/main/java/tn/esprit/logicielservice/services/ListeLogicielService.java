@@ -12,9 +12,6 @@ import java.util.Optional;
 public class ListeLogicielService implements IListeLogiciel{
     @Autowired
     private ListeLogicielRepository listeLogicielRepository;
-    public List<ListeLogiciel> getLogicielsByEquipement(Long idEquipement) {
-        return listeLogicielRepository.findByEquipementId(idEquipement);
-    }
 
     @Override
     public ListeLogiciel createLogiciel(ListeLogiciel logiciel) {

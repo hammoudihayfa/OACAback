@@ -18,8 +18,9 @@ public interface IListeEquipement {
 
     void affecterAgentAEquipement(Long idEquipement, Long matricule);
 
-    // Trouver les équipements disponibles (non affectés)
     List<ListeEquipementsParAgent> getEquipementsDisponibles();
 
     ListeEquipementsParAgent changerStatutEquipement(Long idEquipement, String nouveauStatut);
+    List<ListeEquipementsParAgent> findByMarque(String marque);
+
 }

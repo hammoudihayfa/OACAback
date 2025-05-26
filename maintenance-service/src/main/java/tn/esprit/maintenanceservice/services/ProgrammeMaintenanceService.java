@@ -2,24 +2,46 @@ package tn.esprit.maintenanceservice.services;
 
 import com.opencsv.CSVWriter;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tn.esprit.maintenanceservice.entities.FrequencyType;
 import tn.esprit.maintenanceservice.entities.ProgrammeMaintenance;
 import tn.esprit.maintenanceservice.repositories.ProgrammeMaintenanceRepository;
 
 import java.io.IOException;
-import java.util.Calendar;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
 @Service
-public class ProgrammeMaintenanceService implements IProgrammeMaintenance{
-    @Autowired
-    private ProgrammeMaintenanceRepository programmeMaintenanceRepository;
+public class ProgrammeMaintenanceService implements IProgrammeMaintenance {
+
+    private final ProgrammeMaintenanceRepository programmeMaintenanceRepository;
+
+    public ProgrammeMaintenanceService(ProgrammeMaintenanceRepository programmeMaintenanceRepository) {
+        this.programmeMaintenanceRepository = programmeMaintenanceRepository;
+    }
+
+    private LocalDate calculateNextDueDate(LocalDate startDate, FrequencyType frequencyType) {
+        if (startDate == null || frequencyType == null) {
+            return null;
+        }
+
+        return switch (frequencyType) {
+            case DAILY -> startDate.plusDays(1);
+            case WEEKLY -> startDate.plusWeeks(1);
+            case MONTHLY -> startDate.plusMonths(1);
+            case QUARTERLY -> startDate.plusMonths(3);
+            case YEARLY -> startDate.plusYears(1);
+            case ONE_TIME -> startDate;
+        };
+    }
+
     @Override
-    public ProgrammeMaintenance createProgrammeMaintenance(ProgrammeMaintenance programmeMaintenance) {
-        return programmeMaintenanceRepository.save(programmeMaintenance);
+    public ProgrammeMaintenance ajouterProgrammeMaintenance(ProgrammeMaintenance programme) {
+        if (programme.getStartDate() != null && programme.getFrequencyType() != null) {
+            programme.setNextDueDate(calculateNextDueDate(programme.getStartDate(), programme.getFrequencyType()));
+        }
+        return programmeMaintenanceRepository.save(programme);
     }
 
     @Override
@@ -28,78 +50,73 @@ public class ProgrammeMaintenanceService implements IProgrammeMaintenance{
     }
 
     @Override
-    public Optional<ProgrammeMaintenance> getProgrammeMaintenanceById(Long idProgrammeMaintenance) {
-        return programmeMaintenanceRepository.findById(idProgrammeMaintenance);
+    public Optional<ProgrammeMaintenance> getProgrammeMaintenanceById(Long id) {
+        return programmeMaintenanceRepository.findById(id);
     }
 
     @Override
-    public ProgrammeMaintenance updateProgrammeMaintenance(Long idProgrammeMaintenance, ProgrammeMaintenance programmeMaintenance) {
-        if (programmeMaintenanceRepository.existsById(idProgrammeMaintenance)) {
-            programmeMaintenance.setIdProgrammeMaintenance(idProgrammeMaintenance);
-            return programmeMaintenanceRepository.save(programmeMaintenance);
-        } else {
-            return null;
-        }
+    public ProgrammeMaintenance updateProgrammeMaintenance(Long id, ProgrammeMaintenance programmeDetails) {
+        return programmeMaintenanceRepository.findById(id)
+                .map(programme -> {
+                    programme.setPlanAction(programmeDetails.getPlanAction());
+                    programme.setProcedureMaintenance(programmeDetails.getProcedureMaintenance());
+                    programme.setActionCorrective(programmeDetails.getActionCorrective());
+                    programme.setObservation(programmeDetails.getObservation());
+                    programme.setResponsable(programmeDetails.getResponsable());
+                    programme.setEtudeSecurite(programmeDetails.getEtudeSecurite());
+                    programme.setStartDate(programmeDetails.getStartDate());
+                    programme.setFrequencyType(programmeDetails.getFrequencyType());
+                    programme.setEstimatedDurationDays(programmeDetails.getEstimatedDurationDays());
+
+                    if (programme.getStartDate() != null && programme.getFrequencyType() != null) {
+                        programme.setNextDueDate(calculateNextDueDate(programme.getStartDate(), programme.getFrequencyType()));
+                    } else {
+                        programme.setNextDueDate(null);
+                    }
+
+                    return programmeMaintenanceRepository.save(programme);
+                }).orElse(null);
     }
 
     @Override
-    public void deleteProgrammeMaintenance(Long idProgrammeMaintenance) {
-        if (programmeMaintenanceRepository.existsById(idProgrammeMaintenance)) {
-            programmeMaintenanceRepository.deleteById(idProgrammeMaintenance);
-        } else {
-            throw new RuntimeException("Programme de maintenance avec l'ID " + idProgrammeMaintenance + " n'existe pas.");
-        }
+    public void deleteProgrammeMaintenance(Long id) {
+        programmeMaintenanceRepository.deleteById(id);
     }
-    // Avancee
-    public List<ProgrammeMaintenance> getProgrammesByDateBefore(Date date) {
-        return programmeMaintenanceRepository.findByDateDerniereExecutionBefore(date);
+
+    @Override
+    public List<ProgrammeMaintenance> getProgrammesMaintenanceByResponsable(String responsable) {
+        return programmeMaintenanceRepository.findByResponsableContainingIgnoreCase(responsable);
     }
-    public List<ProgrammeMaintenance> getProgrammesByResponsable(String responsable) {
-        return programmeMaintenanceRepository.findByResponsable(responsable);
-    }
-    public long countProgrammesExecutedBetween(Date startDate, Date endDate) {
-        return programmeMaintenanceRepository.countByDateDerniereExecutionBetween(startDate, endDate);
-    }
+
+    @Override
     public void exportProgrammesToCSV(HttpServletResponse response) throws IOException {
         List<ProgrammeMaintenance> programmes = programmeMaintenanceRepository.findAll();
         response.setContentType("text/csv");
         response.setHeader("Content-Disposition", "attachment; filename=programmes.csv");
 
         CSVWriter writer = new CSVWriter(response.getWriter());
-        writer.writeNext(new String[] { "ID", "Nom", "Fréquence", "Date Dernière Exécution" });
+        writer.writeNext(new String[] {
+                "ID",
+                "Plan d'Action",
+                "Procédure de Maintenance",
+                "Action Corrective",
+                "Observation",
+                "Responsable",
+                "Étude de Sécurité"
+        });
 
         for (ProgrammeMaintenance programme : programmes) {
             writer.writeNext(new String[] {
                     String.valueOf(programme.getIdProgrammeMaintenance()),
-                    programme.getNomProgramme(),
-                    programme.getFrequence(),
-                    programme.getDateDerniereExecution().toString()
+                    programme.getPlanAction(),
+                    programme.getProcedureMaintenance(),
+                    programme.getActionCorrective(),
+                    programme.getObservation(),
+                    programme.getResponsable(),
+                    programme.getEtudeSecurite()
             });
         }
 
         writer.close();
     }
-
-    public Date getNextExecutionDate(ProgrammeMaintenance programme) {
-        // Exemple basique, selon la fréquence : "semaine", "mois", etc.
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(programme.getDateDerniereExecution());
-
-        switch (programme.getFrequence()) {
-            case "semaine":
-                cal.add(Calendar.WEEK_OF_YEAR, 1);
-                break;
-            case "mois":
-                cal.add(Calendar.MONTH, 1);
-                break;
-            default:
-                // Si aucune fréquence n'est précisée
-                return programme.getDateDerniereExecution();
-        }
-
-        return cal.getTime();
-    }
-
-
-
 }

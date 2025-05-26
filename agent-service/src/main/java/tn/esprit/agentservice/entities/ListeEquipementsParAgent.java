@@ -54,6 +54,14 @@ public class ListeEquipementsParAgent {
         this.nature = nature;
     }
 
+    public String getnSerie() {
+        return nSerie;
+    }
+
+    public void setnSerie(String nSerie) {
+        this.nSerie = nSerie;
+    }
+
     public String getMarque() {
         return marque;
     }

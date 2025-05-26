@@ -8,7 +8,6 @@ import java.util.List;
 
 @Repository
 public interface ListeLogicielRepository extends JpaRepository<ListeLogiciel,Long> {
-    List<ListeLogiciel> findByEquipementId(Long equipementId);
     List<ListeLogiciel> findByNomLogicielContainingIgnoreCase(String nom);
     List<ListeLogiciel> findByVersionContainingIgnoreCase(String version);
 

@@ -14,4 +14,5 @@ public interface IEquipementEnPanne {
     EquipementEnPanne updateEquipementEnPanne(Long idEquipementEnPane, EquipementEnPanne equipementEnPanne);
 
     void deleteEquipementEnPanne(Long idEquipementEnPane);
+    public double getGlobalFailureRate();
 }

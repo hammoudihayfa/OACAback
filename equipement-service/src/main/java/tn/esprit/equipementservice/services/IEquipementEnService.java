@@ -11,4 +11,6 @@ public interface IEquipementEnService {
     void supprimerEquipementEnService(Long idEquipementEnService);
     Optional<EquipementEnService> obtenirEquipementEnServiceParId(Long idEquipementEnService);
     List<EquipementEnService> obtenirTousLesEquipementsEnService();
+    Optional<EquipementEnService> obtenirEquipementParNumeroPatrimoine(Long numeroPatrimoine);
+
 }

@@ -6,13 +6,16 @@ import java.util.List;
 import java.util.Optional;
 
 public interface IEquipementTransfere {
-    EquipementTransfere createEquipementTransfere(EquipementTransfere equipementTransfere);
+    EquipementTransfere addEquipementTransfere(EquipementTransfere equipementTransfere);
 
-    Optional<EquipementTransfere> getEquipementTransfereById(Long idEquipementTransfere);
+    Optional<EquipementTransfere> getEquipementTransfereById(Long id);
 
-    List<EquipementTransfere> getAllEquipementTransfere();
 
-    EquipementTransfere updateEquipementTransfere(Long idEquipementTransfere, EquipementTransfere equipementTransfere);
+    List<EquipementTransfere> getAllEquipementsTransferes();
 
-    void deleteEquipementTransfere(Long idEquipementTransfere);
+    EquipementTransfere updateEquipementTransfere(Long id, EquipementTransfere equipementTransfere);
+
+    void deleteEquipementTransfere(Long id);
+
+    List<EquipementTransfere> getEquipementsTransferesByEquipementId(Long equipementId);
 }

@@ -1,37 +1,38 @@
 package tn.esprit.equipementservice.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Data;
 
 import java.sql.Date;
-
 @Entity
-@Data
 public class EquipementRepartition {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idEquipementRepartition;
 
-    @ManyToOne(cascade = CascadeType.MERGE)
+    @ManyToOne
     @JoinColumn(name = "equipement_id")
     private EquipementInformatique equipement;
 
     private String localisation;
     private String uniteResponsable;
+    private Date dateDebut;
     private Date dateFin;
 
     public EquipementRepartition() {
     }
 
-    public EquipementRepartition(Long idEquipementRepartition, EquipementInformatique equipement, String localisation, String uniteResponsable, Date dateFin) {
+    public EquipementRepartition(Long idEquipementRepartition, EquipementInformatique equipement, String localisation, String uniteResponsable, Date dateDebut, Date dateFin) {
         this.idEquipementRepartition = idEquipementRepartition;
         this.equipement = equipement;
         this.localisation = localisation;
         this.uniteResponsable = uniteResponsable;
+        this.dateDebut = dateDebut;
         this.dateFin = dateFin;
     }
 
+    // Getters and Setters...
     public Long getIdEquipementRepartition() {
         return idEquipementRepartition;
     }
@@ -71,4 +72,13 @@ public class EquipementRepartition {
     public void setDateFin(Date dateFin) {
         this.dateFin = dateFin;
     }
+
+    public Date getDateDebut() {
+        return dateDebut;
+    }
+
+    public void setDateDebut(Date dateDebut) {
+        this.dateDebut = dateDebut;
+    }
+
 }

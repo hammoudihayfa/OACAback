@@ -1,66 +1,88 @@
 package tn.esprit.userservice.services;
 
-import tn.esprit.userservice.entites.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import tn.esprit.userservice.entites.User;
+
 import tn.esprit.userservice.repository.UserRepo;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
-public class UserService implements IUser{
-    @Autowired
-    private UserRepo userRepository;
-    @Override
-    public User saveUser(User user) {
-        return userRepository.save(user);
-    }
+public class UserService {
 
-    @Override
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
-    }
+ private final UserRepo userRepository;
 
-    @Override
-    public User getUserById(Long id) {
-        return userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
-    }
 
-    @Override
-    public User updateUser(Long id, User user) {
-        User existing = getUserById(id);
-        existing.setNom(user.getNom());
-        existing.setPrenom(user.getPrenom());
-        existing.setEmail(user.getEmail());
-        existing.setMotDePasse(user.getMotDePasse());
-        existing.setRole(user.getRole());
-        return userRepository.save(existing);
-    }
+ private final BCryptPasswordEncoder passwordEncoder;
 
-    @Override
-    public void deleteUser(Long id) {
-        userRepository.deleteById(id);
-    }
+ @Autowired
+ public UserService(UserRepo userRepository,  BCryptPasswordEncoder passwordEncoder) {
+  this.userRepository = userRepository;
+  this.passwordEncoder = passwordEncoder;
+ }
 
-    @Override
-    public User login(String email, String password) {
-        return userRepository.findByEmail(email)
-                .filter(user -> user.getMotDePasse().equals(password))
-                .orElseThrow(() -> new RuntimeException("Invalid credentials"));
-    }
+ public User register(User user) {
+  System.out.println("Inscription utilisateur : " + user.getEmail());
+  user.setPassword(passwordEncoder.encode(user.getPassword()));
+  return userRepository.save(user);
+ }
 
-    @Override
-    public String forgotPassword(String email) {
-        Optional<User> userOpt = userRepository.findByEmail(email);
-        if (userOpt.isEmpty()) throw new RuntimeException("User not found");
-        return "Mot de passe actuel: " + userOpt.get().getMotDePasse();
-    }
+ public User login(String email, String password) {
+  return userRepository.findByEmail(email)
+          .filter(u -> passwordEncoder.matches(password, u.getPassword()))
+          .orElse(null);
+ }
+ public Optional<User> getUserById(Long id) {
+  return userRepository.findById(id);
+ }
 
-    @Override
-    public User resetPassword(String email, String newPassword) {
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
-        user.setMotDePasse(newPassword);
-        return userRepository.save(user);
-    }
+ public User updateUser(Long id, User updatedUser) {
+  Optional<User> existingUserOptional = userRepository.findById(id);
+  if (existingUserOptional.isPresent()) {
+   User user = existingUserOptional.get();
+   user.setName(updatedUser.getName());
+   user.setPrenom(updatedUser.getPrenom());
+   user.setEmail(updatedUser.getEmail());
+   user.setAeroport(updatedUser.getAeroport());
+   user.setRole(updatedUser.getRole());
+   user.setPassword(updatedUser.getPassword());
+   return userRepository.save(user);
+  }
+  return null;
+ }
+
+ public Optional<User> findUserByEmail(String email) {
+  return userRepository.findByEmail(email);
+ }
+
+ public Optional<User> findByPhoneNumber(String phoneNumber) {
+  return userRepository.findByPhoneNumber(phoneNumber);
+ }
+
+
+ public User resetPassword(String phoneNumber, String newPassword, String enteredCode) {
+  Optional<User> userOptional = userRepository.findByPhoneNumber(phoneNumber);
+
+  if (userOptional.isEmpty()) {
+   return null;
+  }
+
+  User user = userOptional.get();
+
+  if (user.getResetCode() != null && user.getResetCode().equals(enteredCode)) {
+   user.setPassword(newPassword);
+   user.setResetCode(null);
+   return userRepository.save(user);
+  }
+
+  return null;
+ }
+ public User save(User user) {
+  return userRepository.save(user);
+ }
+
+
 }

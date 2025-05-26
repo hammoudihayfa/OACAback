@@ -11,14 +11,13 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@CrossOrigin(origins = "*")
+
 @RequestMapping("/logiciels-service")
 public class ListeLogicielController {
     @Autowired
     private IListeLogiciel listeLogicielService;
-    @GetMapping("/equipement/{idEquipement}")
-    public List<ListeLogiciel> getLogicielsByEquipement(@PathVariable("idEquipement") Long idEquipement) {
-        return listeLogicielService.getLogicielsByEquipement(idEquipement);
-    }
+
 
     @PostMapping
     public ResponseEntity<ListeLogiciel> createLogiciel(@RequestBody ListeLogiciel logiciel) {

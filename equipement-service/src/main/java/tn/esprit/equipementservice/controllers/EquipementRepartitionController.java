@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@CrossOrigin(origins = "*")
+
 @RequestMapping("/equipements-repartition")
 public class EquipementRepartitionController {
     private final EquipementRepartitionService equipementRepartitionService;
@@ -48,7 +50,6 @@ public class EquipementRepartitionController {
                 ? new ResponseEntity<>(updatedEquipementRepartition, HttpStatus.OK)
                 : new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
-
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteEquipementRepartition(@PathVariable Long id) {
         equipementRepartitionService.deleteEquipementRepartition(id);

@@ -1,39 +1,35 @@
 package tn.esprit.agentservice.entities;
 
 import jakarta.persistence.*;
-
 import java.util.List;
 
 @Entity
 public class AgentNavigationAerienne {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long matricule;
     private String nom;
-
     private String prenom;
-
     private String unite;
-
     private String fonction;
     private String email;
-
     private int cin;
     @OneToMany(mappedBy = "agent")
     private List<Annonce> annonces;
-
     public AgentNavigationAerienne() {
     }
 
-    public AgentNavigationAerienne(Long matricule, String nom, String prenom, String unite, String fonction, String email, int cin) {
-        this.matricule = matricule;
+    public AgentNavigationAerienne(String nom, String prenom, String unite, String fonction, String email, int cin) {
         this.nom = nom;
         this.prenom = prenom;
         this.unite = unite;
         this.fonction = fonction;
         this.email = email;
         this.cin = cin;
+
     }
+
     public void setMatricule(Long matricule) {
         this.matricule = matricule;
     }
@@ -50,6 +46,7 @@ public class AgentNavigationAerienne {
     public void setNom(String nom) {
         this.nom = nom;
     }
+
 
     public String getPrenom() {
         return prenom;

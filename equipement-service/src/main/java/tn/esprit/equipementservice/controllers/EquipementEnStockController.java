@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@CrossOrigin(origins = "*")
+
 @RequestMapping("/equipements-en-stock")
 public class EquipementEnStockController {
     @Autowired

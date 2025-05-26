@@ -16,6 +16,8 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/rapports")
+@CrossOrigin(origins = "*")
+
 public class RapportController {
 
     @Autowired

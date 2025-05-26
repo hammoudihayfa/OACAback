@@ -15,17 +15,44 @@ public class HistoriqueMouvement {
 
     private String typeMouvement;
     private LocalDate dateMouvement;
+    private String utilisateur;
+    private String commentaire;
 
-    public HistoriqueMouvement(Long idMouvement) {
-        this.idMouvement = idMouvement;
-    }
+
+
 
     public HistoriqueMouvement() {
+    }
+
+    public HistoriqueMouvement(Long idMouvement, EquipementInformatique equipement, String typeMouvement, LocalDate dateMouvement, String utilisateur, String commentaire) {
+        this.idMouvement = idMouvement;
+        this.equipement = equipement;
+        this.typeMouvement = typeMouvement;
+        this.dateMouvement = dateMouvement;
+        this.utilisateur = utilisateur;
+        this.commentaire = commentaire;
+    }
+
+    public String getUtilisateur() {
+        return utilisateur;
+    }
+
+    public void setUtilisateur(String utilisateur) {
+        this.utilisateur = utilisateur;
+    }
+
+    public String getCommentaire() {
+        return commentaire;
+    }
+
+    public void setCommentaire(String commentaire) {
+        this.commentaire = commentaire;
     }
 
     public Long getIdMouvement() {
         return idMouvement;
     }
+
 
     public void setIdMouvement(Long idMouvement) {
         this.idMouvement = idMouvement;
