@@ -47,7 +47,12 @@
 			<artifactId>tess4j</artifactId>
 			<version>4.5.1</version>
 		</dependency>
-
+		<!-- Pour SonarQube -->
+		<dependency>
+			<groupId>org.sonarsource.scanner.maven</groupId>
+			<artifactId>sonar-maven-plugin</artifactId>
+			<version>3.9.1.2184</version>
+		</dependency>
 		<!-- Eureka Client -->
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
