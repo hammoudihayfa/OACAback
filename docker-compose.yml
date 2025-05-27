@@ -1,0 +1,89 @@
+
+
+services:
+  mysql-db:
+    image: mysql:8.0
+    container_name: mysql-db
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: mydatabase
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: admin
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+  eureka-service:
+    build: ./eureka-service
+    ports:
+      - "8761:8761"
+    container_name: eureka-service
+    depends_on:
+      - mysql-db
+
+  gateway-service:
+    build: ./gateway-service
+    ports:
+      - "8096:8096"
+    depends_on:
+      - eureka-service
+      - mysql-db
+    container_name: gateway-service
+
+  user-service:
+    build: ./user-service
+    ports:
+      - "8088:8088"
+    depends_on:
+      - eureka-service
+      - mysql-db
+    container_name: user-service
+
+  email-service:
+    build: ./email-service
+    ports:
+      - "8089:8089"
+    depends_on:
+      - eureka-service
+      - mysql-db
+    container_name: email-service
+
+  equipement-service:
+    build: ./equipement-service
+    ports:
+      - "8081:8081"
+    depends_on:
+      - eureka-service
+      - mysql-db
+    container_name: equipement-service
+
+  logiciel-service:
+    build: ./logiciel-service
+    ports:
+      - "8084:8084"
+    depends_on:
+      - eureka-service
+      - mysql-db
+    container_name: logiciel-service
+
+  maintenance-service:
+    build: ./maintenance-service
+    ports:
+      - "8083:8083"
+    depends_on:
+      - eureka-service
+      - mysql-db
+    container_name: maintenance-service
+
+  ocr-service:
+    build: ./ocr-service
+    ports:
+      - "8080:8080"
+    depends_on:
+      - eureka-service
+      - mysql-db
+    container_name: ocr-service
+
+volumes:
+  mysql-data:

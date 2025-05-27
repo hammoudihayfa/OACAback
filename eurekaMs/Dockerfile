@@ -1,4 +1,5 @@
-FROM openjdk:17
+FROM openjdk:17-jdk-slim
+WORKDIR /app
 EXPOSE 8761
-ADD target/eurekaMs-0.0.1-SNAPSHOT.jar eurekaMs.jar
+COPY target/eurekaMs-1.0.jar eurekaMs.jar
 ENTRYPOINT ["java", "-jar", "eurekaMs.jar"]
