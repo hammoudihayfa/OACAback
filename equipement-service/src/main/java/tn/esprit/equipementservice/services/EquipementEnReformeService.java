@@ -17,16 +17,13 @@ public class EquipementEnReformeService implements IEquipementEnReforme {
     @Autowired
     private EquipementRepository equipementInformatiqueRepository;
     public EquipementReforme createEquipementReforme(EquipementReforme equipementReforme) {
-        // Vérifiez si l'équipement est null avant d'essayer d'y accéder
         if (equipementReforme.getEquipement() == null) {
             throw new RuntimeException("L'équipement associé est null");
         }
 
-        // Rechercher l'équipement dans la base de données
         Optional<EquipementInformatique> equipementOptional = equipementInformatiqueRepository.findById(equipementReforme.getEquipement().getIdEquipement());
 
         if (equipementOptional.isPresent()) {
-            // L'équipement existe, on l'associe à l'entité EquipementReforme
             equipementReforme.setEquipement(equipementOptional.get());
             return equipementReformeRepository.save(equipementReforme);
         } else {

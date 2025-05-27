@@ -29,11 +29,7 @@ public class EquipementInformatique {
 
     private String etat;
 
-    @OneToMany(mappedBy = "equipement", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore
-    @JsonManagedReference
 
-    private List<EtatEquipement> etatEquipements = new ArrayList<>();
 
     @OneToMany(mappedBy = "equipement", cascade = CascadeType.ALL, orphanRemoval = true)
 @JsonIgnore
@@ -42,9 +38,7 @@ public class EquipementInformatique {
     @OneToMany(mappedBy = "equipement", cascade = CascadeType.REMOVE, orphanRemoval = true)
     @JsonIgnore
     private List<HistoriqueMouvement> historiqueMouvements = new ArrayList<>();
-    @OneToOne(mappedBy = "equipement", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    @JsonIgnore
-    private EquipementEnService equipementEnService;
+
 
     @OneToMany(mappedBy = "equipement", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
@@ -161,13 +155,7 @@ public class EquipementInformatique {
         this.etat = etat;
     }
 
-    public List<EtatEquipement> getEtatEquipements() {
-        return etatEquipements;
-    }
 
-    public void setEtatEquipements(List<EtatEquipement> etatEquipements) {
-        this.etatEquipements = etatEquipements;
-    }
 
     public List<EquipementEnPanne> getEquipementEnPannes() {
         return equipementEnPannes;
@@ -185,20 +173,12 @@ public class EquipementInformatique {
         this.historiqueMouvements = historiqueMouvements;
     }
 
-    public EquipementEnService getEquipementEnService() {
-        return equipementEnService;
-    }
-
-    public void setEquipementEnService(EquipementEnService equipementEnService) {
-        this.equipementEnService = equipementEnService;
-    }
-
     // Constructeurs
 
     public EquipementInformatique() {
     }
 
-    public EquipementInformatique(Long idEquipement, int matricule, String typeEquipement, String marqueEquipement, String modeleEquipement, String localisation, String numeroSerie, Date dateMiseEnService, String etat, List<EtatEquipement> etatEquipements, List<EquipementEnPanne> equipementEnPannes, List<HistoriqueMouvement> historiqueMouvements, EquipementEnService equipementEnService, List<EquipementReforme> equipementReformes, List<EquipementTransfere> equipementTransferes, List<EquipementRepartition> equipementRepartitions) {
+    public EquipementInformatique(Long idEquipement, int matricule, String typeEquipement, String marqueEquipement, String modeleEquipement, String localisation, String numeroSerie, Date dateMiseEnService, String etat, List<EquipementEnPanne> equipementEnPannes, List<HistoriqueMouvement> historiqueMouvements, List<EquipementReforme> equipementReformes, List<EquipementTransfere> equipementTransferes, List<EquipementRepartition> equipementRepartitions) {
         this.idEquipement = idEquipement;
         this.matricule = matricule;
         this.typeEquipement = typeEquipement;
@@ -208,10 +188,8 @@ public class EquipementInformatique {
         this.numeroSerie = numeroSerie;
         this.dateMiseEnService = dateMiseEnService;
         this.etat = etat;
-        this.etatEquipements = etatEquipements;
         this.equipementEnPannes = equipementEnPannes;
         this.historiqueMouvements = historiqueMouvements;
-        this.equipementEnService = equipementEnService;
         this.equipementReformes = equipementReformes;
         this.equipementTransferes = equipementTransferes;
         this.equipementRepartitions = equipementRepartitions;
