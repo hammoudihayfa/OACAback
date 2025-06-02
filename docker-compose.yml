@@ -12,7 +12,7 @@ services:
     volumes:
       - mysql-data:/var/lib/mysql
 
-  eurekaMs:
+  eurekaMs: # Nom du service correspondant au nom du dossier (si c'est bien "eurekaMs")
     build: ./eurekaMs
     ports:
       - "8761:8761"
@@ -20,15 +20,14 @@ services:
     depends_on:
       - mysql-db
 
-  
-  apigateway:
-    build: ./apiGateway 
+  apigateway: # Nom du service en minuscules pour Docker
+    build: ./apiGateway # Chemin de construction correspondant au nom du dossier réel
     ports:
       - "8096:8096"
     depends_on:
       - eurekaMs
       - mysql-db
-    container_name: gateway-service 
+    container_name: gateway-service
 
   user-service:
     build: ./user-service
@@ -84,7 +83,7 @@ services:
       - mysql-db
     container_name: maintenance-service
 
-  ocr_service:
+  ocr_service: # Nom du service correspondant au nom du dossier (si c'est bien "ocr_service")
     build: ./ocr_service
     ports:
       - "8080:8080"
