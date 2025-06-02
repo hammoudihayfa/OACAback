@@ -11,7 +11,6 @@ env:
   MAINTENANCE_SERVICE_IMAGE: hammoudihayfa/maintenance-service:latest
   EUREKA_SERVICE_IMAGE: hammoudihayfa/eureka-service:latest
   EMAIL_SERVICE_IMAGE: hammoudihayfa/email-service:latest
-  # Le nom de l'image Docker doit être en minuscules
   APIGATEWAY_SERVICE_IMAGE: hammoudihayfa/apigateway-service:latest
   OCR_SERVICE_IMAGE: hammoudihayfa/ocr_service:latest
   LOGICIEL_SERVICE_IMAGE: hammoudihayfa/logiciel-service:latest
@@ -70,7 +69,6 @@ jobs:
         args: >
           -Dsonar.projectKey=hammoudihayfa_OACAback
           -Dsonar.organization=hammoudihayfa
-          # Utiliser les noms de dossiers réels pour les binaires Java
           -Dsonar.java.binaries=ocr_service/target/classes,logiciel-service/target/classes,user-service/target/classes,maintenance-service/target/classes,apiGateway/target/classes,email-service/target/classes,equipement-service/target/classes,agent-service/target/classes,eurekaMs/target/classes
           -Dsonar.host.url=https://sonarcloud.io
 
