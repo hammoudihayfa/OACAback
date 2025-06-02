@@ -11,7 +11,7 @@ env:
   MAINTENANCE_SERVICE_IMAGE: hammoudihayfa/maintenance-service:latest
   EUREKA_SERVICE_IMAGE: hammoudihayfa/eureka-service:latest
   EMAIL_SERVICE_IMAGE: hammoudihayfa/email-service:latest
-  # Corrected to lowercase: APIGATEWAY_SERVICE_IMAGE
+  # Le nom de l'image Docker doit être en minuscules
   APIGATEWAY_SERVICE_IMAGE: hammoudihayfa/apigateway-service:latest
   OCR_SERVICE_IMAGE: hammoudihayfa/ocr_service:latest
   LOGICIEL_SERVICE_IMAGE: hammoudihayfa/logiciel-service:latest
@@ -36,8 +36,8 @@ jobs:
 
     - name: Build & Test Microservices
       run: |
-        # Corrected 'eurekams' to 'eurekaMs' to match actual folder name casing
-        SERVICES="user-service maintenance-service eurekaMs email-service apigateway ocr_service logiciel-service equipement-service agent-service"
+        # Utiliser les noms de dossiers réels (avec leur casse exacte)
+        SERVICES="user-service maintenance-service eurekaMs email-service apiGateway ocr_service logiciel-service equipement-service agent-service"
         for SERVICE in $SERVICES; do
           echo "Building $SERVICE..."
           cd $SERVICE
@@ -54,7 +54,7 @@ jobs:
         ls -R maintenance-service/target/classes || echo "maintenance-service/target/classes not found or empty"
         ls -R eurekaMs/target/classes || echo "eurekaMs/target/classes not found or empty"
         ls -R email-service/target/classes || echo "email-service/target/classes not found or empty"
-        ls -R apiGateway/target/classes || echo "apiGateway/target/classes not found or empty"
+        ls -R apiGateway/target/classes || echo "apiGateway/target/classes not found or empty" # Assurez-vous que le dossier est bien 'apiGateway'
         ls -R ocr_service/target/classes || echo "ocr_service/target/classes not found or empty"
         ls -R logiciel-service/target/classes || echo "logiciel-service/target/classes not found or empty"
         ls -R equipement-service/target/classes || echo "equipement-service/target/classes not found or empty"
@@ -70,6 +70,7 @@ jobs:
         args: >
           -Dsonar.projectKey=hammoudihayfa_OACAback
           -Dsonar.organization=hammoudihayfa
+          # Utiliser les noms de dossiers réels pour les binaires Java
           -Dsonar.java.binaries=ocr_service/target/classes,logiciel-service/target/classes,user-service/target/classes,maintenance-service/target/classes,apiGateway/target/classes,email-service/target/classes,equipement-service/target/classes,agent-service/target/classes,eurekaMs/target/classes
           -Dsonar.host.url=https://sonarcloud.io
 
@@ -86,7 +87,8 @@ jobs:
           [maintenance-service]=$MAINTENANCE_SERVICE_IMAGE
           [eurekaMs]=$EUREKA_SERVICE_IMAGE
           [email-service]=$EMAIL_SERVICE_IMAGE
-          [apigateway]=$APIGATEWAY_SERVICE_IMAGE
+          # Utiliser le nom du dossier réel comme clé, l'image sera en minuscules via la variable d'env
+          [apiGateway]=$APIGATEWAY_SERVICE_IMAGE
           [ocr_service]=$OCR_SERVICE_IMAGE
           [logiciel-service]=$LOGICIEL_SERVICE_IMAGE
           [equipement-service]=$EQUIPEMENT_SERVICE_IMAGE
@@ -95,6 +97,8 @@ jobs:
         for SERVICE_DIR in "${!IMAGES[@]}"; do
           IMAGE=${IMAGES[$SERVICE_DIR]}
           echo "Building Docker image for $SERVICE_DIR -> $IMAGE"
+          # $SERVICE_DIR sera le nom du dossier (ex: apiGateway)
+          # $IMAGE sera le nom de l'image Docker (ex: hammoudihayfa/apigateway-service:latest)
           docker build -t $IMAGE $SERVICE_DIR
           docker push $IMAGE
         done
@@ -103,6 +107,12 @@ jobs:
       run: |
         sudo curl -L "https://github.com/docker/compose/releases/download/v2.24.5/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
         sudo chmod +x /usr/local/bin/docker-compose
+
+    # Nouvelle étape pour lister le contenu de docker-compose.yml
+    - name: Display docker-compose.yml content
+      run: |
+        echo "Content of docker-compose.yml:"
+        cat docker-compose.yml || echo "docker-compose.yml not found!"
 
     - name: Deploy with Docker Compose
       run: |
