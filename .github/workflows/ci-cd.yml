@@ -7,6 +7,7 @@ on:
     branches: [ "main", "master" ]
 
 env:
+  # Images pour Docker Hub (vos images actuelles)
   USER_SERVICE_IMAGE: hammoudihayfa/user-service:latest
   MAINTENANCE_SERVICE_IMAGE: hammoudihayfa/maintenance-service:latest
   EUREKA_SERVICE_IMAGE: hammoudihayfa/eureka-service:latest
@@ -16,6 +17,23 @@ env:
   LOGICIEL_SERVICE_IMAGE: hammoudihayfa/logiciel-service:latest
   EQUIPEMENT_SERVICE_IMAGE: hammoudihayfa/equipement-service:latest
   AGENT_SERVICE_IMAGE: hammoudihayfa/agent-service:latest
+
+  # --- Nouvelles variables d'environnement pour GitHub Container Registry (GHCR) ---
+  GHCR_REGISTRY: ghcr.io
+  GHCR_OWNER: hammoudihayfa # Votre nom d'utilisateur GitHub
+  GHCR_REPO: OACAback # Le nom de votre dépôt GitHub
+
+  # Définir les noms complets des images GHCR (ajustés pour la cohérence des noms de service)
+  GHCR_USER_SERVICE_IMAGE: ghcr.io/hammoudihayfa/oacaback/user-service:latest
+  GHCR_MAINTENANCE_SERVICE_IMAGE: ghcr.io/hammoudihayfa/oacaback/maintenance-service:latest
+  GHCR_EUREKA_SERVICE_IMAGE: ghcr.io/hammoudihayfa/oacaback/eureka-service:latest # Changé de 'eureakams' pour être cohérent
+  GHCR_EMAIL_SERVICE_IMAGE: ghcr.io/hammoudihayfa/oacaback/email-service:latest
+  GHCR_APIGATEWAY_SERVICE_IMAGE: ghcr.io/hammoudihayfa/oacaback/apigateway-service:latest # Changé de 'apigateway' pour être cohérent
+  GHCR_OCR_SERVICE_IMAGE: ghcr.io/hammoudihayfa/oacaback/ocr_service:latest
+  GHCR_LOGICIEL_SERVICE_IMAGE: ghcr.io/hammoudihayfa/oacaback/logiciel-service:latest
+  GHCR_EQUIPEMENT_SERVICE_IMAGE: ghcr.io/hammoudihayfa/oacaback/equipement-service:latest
+  GHCR_AGENT_SERVICE_IMAGE: ghcr.io/hammoudihayfa/oacaback/agent-service:latest
+
 
 jobs:
   build-and-deploy:
@@ -35,7 +53,6 @@ jobs:
 
     - name: Build & Test Microservices
       run: |
-        # Utiliser les noms de dossiers réels (avec leur casse exacte)
         SERVICES="user-service maintenance-service eurekaMs email-service apiGateway ocr_service logiciel-service equipement-service agent-service"
         for SERVICE in $SERVICES; do
           echo "Building $SERVICE..."
@@ -53,7 +70,7 @@ jobs:
         ls -R maintenance-service/target/classes || echo "maintenance-service/target/classes not found or empty"
         ls -R eurekaMs/target/classes || echo "eurekaMs/target/classes not found or empty"
         ls -R email-service/target/classes || echo "email-service/target/classes not found or empty"
-        ls -R apiGateway/target/classes || echo "apiGateway/target/classes not found or empty" # Assurez-vous que le dossier est bien 'apiGateway'
+        ls -R apiGateway/target/classes || echo "apiGateway/target/classes not found or empty"
         ls -R ocr_service/target/classes || echo "ocr_service/target/classes not found or empty"
         ls -R logiciel-service/target/classes || echo "logiciel-service/target/classes not found or empty"
         ls -R equipement-service/target/classes || echo "equipement-service/target/classes not found or empty"
@@ -72,48 +89,150 @@ jobs:
           -Dsonar.java.binaries=ocr_service/target/classes,logiciel-service/target/classes,user-service/target/classes,maintenance-service/target/classes,apiGateway/target/classes,email-service/target/classes,equipement-service/target/classes,agent-service/target/classes,eurekaMs/target/classes
           -Dsonar.host.url=https://sonarcloud.io
 
-    - name: Login to Docker Hub
+    - name: Login to Docker Hub and GHCR
       uses: docker/login-action@v2
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
+        registry: ${{ env.GHCR_REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Build & Push Docker Images
+    - name: Build & Push Docker Images (Docker Hub & GHCR)
       run: |
-        declare -A IMAGES=(
+        declare -A DOCKER_HUB_IMAGES=(
           [user-service]=$USER_SERVICE_IMAGE
           [maintenance-service]=$MAINTENANCE_SERVICE_IMAGE
           [eurekaMs]=$EUREKA_SERVICE_IMAGE
           [email-service]=$EMAIL_SERVICE_IMAGE
-          # Utiliser le nom du dossier réel comme clé, l'image sera en minuscules via la variable d'env
           [apiGateway]=$APIGATEWAY_SERVICE_IMAGE
           [ocr_service]=$OCR_SERVICE_IMAGE
           [logiciel-service]=$LOGICIEL_SERVICE_IMAGE
           [equipement-service]=$EQUIPEMENT_SERVICE_IMAGE
           [agent-service]=$AGENT_SERVICE_IMAGE
         )
-        for SERVICE_DIR in "${!IMAGES[@]}"; do
-          IMAGE=${IMAGES[$SERVICE_DIR]}
-          echo "Building Docker image for $SERVICE_DIR -> $IMAGE"
-          # $SERVICE_DIR sera le nom du dossier (ex: apiGateway)
-          # $IMAGE sera le nom de l'image Docker (ex: hammoudihayfa/apigateway-service:latest)
-          docker build -t $IMAGE $SERVICE_DIR
-          docker push $IMAGE
+
+        declare -A GHCR_IMAGES=(
+          [user-service]=$GHCR_USER_SERVICE_IMAGE
+          [maintenance-service]=$GHCR_MAINTENANCE_SERVICE_IMAGE
+          [eurekaMs]=$GHCR_EUREKA_SERVICE_IMAGE
+          [email-service]=$GHCR_EMAIL_SERVICE_IMAGE
+          [apiGateway]=$GHCR_APIGATEWAY_SERVICE_IMAGE
+          [ocr_service]=$GHCR_OCR_SERVICE_IMAGE
+          [logiciel-service]=$GHCR_LOGICIEL_SERVICE_IMAGE
+          [equipement-service]=$GHCR_EQUIPEMENT_SERVICE_IMAGE
+          [agent-service]=$GHCR_AGENT_SERVICE_IMAGE
+        )
+
+        for SERVICE_DIR in "${!DOCKER_HUB_IMAGES[@]}"; do
+          DOCKER_HUB_IMAGE=${DOCKER_HUB_IMAGES[$SERVICE_DIR]}
+          GHCR_IMAGE=${GHCR_IMAGES[$SERVICE_DIR]}
+
+          echo "Building Docker image for $SERVICE_DIR..."
+          docker build -t "$DOCKER_HUB_IMAGE" -t "$GHCR_IMAGE" "$SERVICE_DIR"
+
+          echo "Pushing Docker image to Docker Hub: $DOCKER_HUB_IMAGE"
+          docker push "$DOCKER_HUB_IMAGE"
+
+          echo "Pushing Docker image to GHCR: $GHCR_IMAGE"
+          docker push "$GHCR_IMAGE"
         done
 
+    # La phase Docker Compose reste une validation locale, avant le déploiement K8s réel.
+    # Vous pouvez la laisser ou la retirer si vous considérez que le déploiement K8s est suffisant comme test.
     - name: Install Docker Compose
       run: |
         sudo curl -L "https://github.com/docker/compose/releases/download/v2.24.5/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
         sudo chmod +x /usr/local/bin/docker-compose
 
-    # Nouvelle étape pour lister le contenu de docker-compose.yml
     - name: Display docker-compose.yml content
       run: |
         echo "Content of docker-compose.yml:"
         cat docker-compose.yml || echo "docker-compose.yml not found!"
 
-    - name: Deploy with Docker Compose
+    - name: Deploy with Docker Compose (Local Validation)
       run: |
         docker-compose down --volumes --remove-orphans || true
         docker-compose up -d --build
         docker-compose ps
+
+    # --- Nouvelle section pour le déploiement sur Kubernetes ---
+    - name: Set up Kubeconfig for Kubernetes Deployment
+      # Cette étape varie énormément en fonction de votre fournisseur de cloud (AWS, Azure, GCP)
+      # ou si c'est un cluster self-hosted.
+
+      # --- EXEMPLE GÉNÉRIQUE (pour un fichier kubeconfig dans un secret GitHub) ---
+      # Créez un secret GitHub nommé KUBE_CONFIG qui contient le contenu de votre fichier ~/.kube/config
+      # Cela est généralement utilisé pour les clusters auto-hébergés ou des configurations spécifiques.
+      env:
+        KUBECONFIG_BASE64: ${{ secrets.KUBE_CONFIG_BASE64 }} # Assurez-vous que ce secret existe
+
+      run: |
+        # Décode le secret KUBE_CONFIG_BASE64 et le place dans un fichier kubeconfig temporaire
+        mkdir -p ~/.kube
+        echo "${KUBECONFIG_BASE64}" | base64 -d > ~/.kube/config
+        chmod 600 ~/.kube/config
+        echo "Kubeconfig configured."
+
+      # --- EXEMPLES SPÉCIFIQUES À DES CLOUDS (choisissez celui qui correspond à votre cluster) ---
+      # Pour AWS EKS:
+      # uses: aws-actions/configure-aws-credentials@v3
+      # with:
+      #   aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #   aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #   aws-region: your-aws-region # ex: eu-west-1
+      # - name: Update Kubeconfig for EKS
+      #   run: |
+      #     aws eks update-kubeconfig --name your-eks-cluster-name --region your-aws-region
+
+      # Pour Azure AKS:
+      # uses: azure/login@v1
+      # with:
+      #   creds: ${{ secrets.AZURE_CREDENTIALS }} # Un secret contenant un service principal JSON
+      # - uses: azure/aks-set-context@v3
+      #   with:
+      #     cluster-name: your-aks-cluster-name
+      #     resource-group: your-aks-resource-group
+
+      # Pour Google GKE:
+      # uses: google-github-actions/auth@v1
+      # with:
+      #   credentials_json: ${{ secrets.GCP_SA_KEY }} # Un secret contenant la clé JSON du compte de service
+      # - uses: google-github-actions/get-gke-credentials@v1
+      #   with:
+      #     cluster_name: your-gke-cluster-name
+      #     location: your-gke-region-or-zone # ex: europe-west1-b
+      #     project_id: your-gcp-project-id
+
+    - name: Install kubectl
+      uses: azure/setup-kubectl@v3 # Cette action est pratique et fonctionne pour toutes les plateformes
+      id: install_kubectl
+
+    - name: Deploy to Kubernetes
+      # Cette étape s'exécutera SEULEMENT si l'étape de construction et de push a réussi
+      if: success()
+      run: |
+        echo "Déploiement des microservices sur Kubernetes..."
+        # Assurez-vous que vos fichiers de manifeste Kubernetes (Deployment, Service, Ingress, etc.)
+        # sont présents dans votre dépôt, par exemple dans un dossier 'k8s' à la racine.
+
+        # Exemple : Appliquer tous les manifestes dans le dossier 'k8s'
+        # Vous devrez créer ces fichiers YAML pour chaque service.
+        # Par exemple, k8s/user-service-deployment.yaml, k8s/user-service-service.yaml, etc.
+        kubectl apply -f ./k8s/ # Assurez-vous que ce dossier existe et contient vos manifestes
+
+        # Optionnel : Vérifier le statut du déploiement
+        # Remplacez 'votre-service' par le nom d'un de vos déploiements K8s
+        # kubectl rollout status deployment/user-service || true # Exemple pour un service
+        echo "Déploiement Kubernetes terminé."
+
+    - name: Verify Kubernetes Deployment (Optional)
+      if: always()
+      run: |
+        echo "Vérification des pods Kubernetes:"
+        kubectl get pods
+        echo "Vérification des services Kubernetes:"
+        kubectl get services
+        # Vous pouvez ajouter d'autres vérifications ici, par exemple:
+        # kubectl get deployments
+        # kubectl describe deployment user-service # Pour voir les détails si un problème survient
