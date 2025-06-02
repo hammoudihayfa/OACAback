@@ -98,22 +98,15 @@ jobs:
           docker push $IMAGE
         done
 
-    # Nouvelle étape pour installer Docker Compose
+    # Nouvelle étape pour installer Docker Compose (méthode plus robuste)
     - name: Install Docker Compose
       run: |
-        sudo apt-get update
-        sudo apt-get install -y docker-compose-plugin # Installe la version plugin de docker compose (docker compose)
-        # Ou pour l'ancienne version (docker-compose) :
-        # sudo curl -L "https://github.com/docker/compose/releases/download/v2.24.5/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-        # sudo chmod +x /usr/local/bin/docker-compose
+        sudo curl -L "https://github.com/docker/compose/releases/download/v2.24.5/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+        sudo chmod +x /usr/local/bin/docker-compose
 
     - name: Deploy with Docker Compose
       run: |
-        # Utiliser la nouvelle syntaxe 'docker compose' si le plugin est installé
-        docker compose down --volumes --remove-orphans || true
-        docker compose up -d --build
-        docker compose ps
-        # Si vous utilisez l'ancienne version de docker-compose, remplacez par :
-        # docker-compose down --volumes --remove-orphans || true
-        # docker-compose up -d --build
-        # docker-compose ps
+        # Utiliser l'ancienne syntaxe 'docker-compose' car nous installons la version autonome
+        docker-compose down --volumes --remove-orphans || true
+        docker-compose up -d --build
+        docker-compose ps
