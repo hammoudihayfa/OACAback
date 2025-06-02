@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: equipement-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: equipement-service
+  template:
+    metadata:
+      labels:
+        app: equipement-service
+    spec:
+      containers:
+        - name: user-service
+          image: ghcr.io/hammoudihayfa/oacaback/equipement-service:latest
+          ports:
+            - containerPort: 8080

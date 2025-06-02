@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: maintenance-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: maintenance-service
+  template:
+    metadata:
+      labels:
+        app: maintenance-service
+    spec:
+      containers:
+        - name: user-service
+          image: ghcr.io/hammoudihayfa/oacaback/maintenance-service:latest
+          ports:
+            - containerPort: 8080
