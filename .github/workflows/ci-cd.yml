@@ -75,7 +75,6 @@ jobs:
         ls -R logiciel-service/target/classes || echo "logiciel-service/target/classes not found or empty"
         ls -R equipement-service/target/classes || echo "equipement-service/target/classes not found or empty"
         ls -R agent-service/target/classes || echo "agent-service/target/classes not found or empty"
-        echo "End of target/classes verification."
 
     - name: SonarCloud Analysis
       uses: SonarSource/sonarqube-scan-action@v5.0.0
@@ -89,12 +88,16 @@ jobs:
           -Dsonar.java.binaries=ocr_service/target/classes,logiciel-service/target/classes,user-service/target/classes,maintenance-service/target/classes,apiGateway/target/classes,email-service/target/classes,equipement-service/target/classes,agent-service/target/classes,eurekaMs/target/classes
           -Dsonar.host.url=https://sonarcloud.io
 
-    - name: Login to Docker Hub and GHCR
+    - name: Login to Docker Hub
       uses: docker/login-action@v2
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
-        registry: ${{ env.GHCR_REGISTRY }}
+
+    - name: Login to GitHub Container Registry (GHCR)
+      uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
@@ -138,8 +141,6 @@ jobs:
           docker push "$GHCR_IMAGE"
         done
 
-    # La phase Docker Compose reste une validation locale, avant le déploiement K8s réel.
-    # Vous pouvez la laisser ou la retirer si vous considérez que le déploiement K8s est suffisant comme test.
     - name: Install Docker Compose
       run: |
         sudo curl -L "https://github.com/docker/compose/releases/download/v2.24.5/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
@@ -156,83 +157,11 @@ jobs:
         docker-compose up -d --build
         docker-compose ps
 
-    # --- Nouvelle section pour le déploiement sur Kubernetes ---
     - name: Set up Kubeconfig for Kubernetes Deployment
-      # Cette étape varie énormément en fonction de votre fournisseur de cloud (AWS, Azure, GCP)
-      # ou si c'est un cluster self-hosted.
-
-      # --- EXEMPLE GÉNÉRIQUE (pour un fichier kubeconfig dans un secret GitHub) ---
-      # Créez un secret GitHub nommé KUBE_CONFIG qui contient le contenu de votre fichier ~/.kube/config
-      # Cela est généralement utilisé pour les clusters auto-hébergés ou des configurations spécifiques.
       env:
-        KUBECONFIG_BASE64: ${{ secrets.KUBE_CONFIG_BASE64 }} # Assurez-vous que ce secret existe
-
+        KUBECONFIG_BASE64: ${{ secrets.KUBE_CONFIG_BASE64 }}
       run: |
-        # Décode le secret KUBE_CONFIG_BASE64 et le place dans un fichier kubeconfig temporaire
         mkdir -p ~/.kube
         echo "${KUBECONFIG_BASE64}" | base64 -d > ~/.kube/config
         chmod 600 ~/.kube/config
         echo "Kubeconfig configured."
-
-      # --- EXEMPLES SPÉCIFIQUES À DES CLOUDS (choisissez celui qui correspond à votre cluster) ---
-      # Pour AWS EKS:
-      # uses: aws-actions/configure-aws-credentials@v3
-      # with:
-      #   aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      #   aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      #   aws-region: your-aws-region # ex: eu-west-1
-      # - name: Update Kubeconfig for EKS
-      #   run: |
-      #     aws eks update-kubeconfig --name your-eks-cluster-name --region your-aws-region
-
-      # Pour Azure AKS:
-      # uses: azure/login@v1
-      # with:
-      #   creds: ${{ secrets.AZURE_CREDENTIALS }} # Un secret contenant un service principal JSON
-      # - uses: azure/aks-set-context@v3
-      #   with:
-      #     cluster-name: your-aks-cluster-name
-      #     resource-group: your-aks-resource-group
-
-      # Pour Google GKE:
-      # uses: google-github-actions/auth@v1
-      # with:
-      #   credentials_json: ${{ secrets.GCP_SA_KEY }} # Un secret contenant la clé JSON du compte de service
-      # - uses: google-github-actions/get-gke-credentials@v1
-      #   with:
-      #     cluster_name: your-gke-cluster-name
-      #     location: your-gke-region-or-zone # ex: europe-west1-b
-      #     project_id: your-gcp-project-id
-
-    - name: Install kubectl
-      uses: azure/setup-kubectl@v3 # Cette action est pratique et fonctionne pour toutes les plateformes
-      id: install_kubectl
-
-    - name: Deploy to Kubernetes
-      # Cette étape s'exécutera SEULEMENT si l'étape de construction et de push a réussi
-      if: success()
-      run: |
-        echo "Déploiement des microservices sur Kubernetes..."
-        # Assurez-vous que vos fichiers de manifeste Kubernetes (Deployment, Service, Ingress, etc.)
-        # sont présents dans votre dépôt, par exemple dans un dossier 'k8s' à la racine.
-
-        # Exemple : Appliquer tous les manifestes dans le dossier 'k8s'
-        # Vous devrez créer ces fichiers YAML pour chaque service.
-        # Par exemple, k8s/user-service-deployment.yaml, k8s/user-service-service.yaml, etc.
-        kubectl apply -f ./k8s/ # Assurez-vous que ce dossier existe et contient vos manifestes
-
-        # Optionnel : Vérifier le statut du déploiement
-        # Remplacez 'votre-service' par le nom d'un de vos déploiements K8s
-        # kubectl rollout status deployment/user-service || true # Exemple pour un service
-        echo "Déploiement Kubernetes terminé."
-
-    - name: Verify Kubernetes Deployment (Optional)
-      if: always()
-      run: |
-        echo "Vérification des pods Kubernetes:"
-        kubectl get pods
-        echo "Vérification des services Kubernetes:"
-        kubectl get services
-        # Vous pouvez ajouter d'autres vérifications ici, par exemple:
-        # kubectl get deployments
-        # kubectl describe deployment user-service # Pour voir les détails si un problème survient
