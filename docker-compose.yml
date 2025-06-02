@@ -16,17 +16,17 @@ services:
     build: ./eurekaMs
     ports:
       - "8761:8761"
-    container_name: eureka-service 
+    container_name: eureka-service
     depends_on:
       - mysql-db
 
- 
-  apiGateway:
-    build: ./apiGateway
+  
+  apigateway:
+    build: ./apiGateway 
     ports:
       - "8096:8096"
     depends_on:
-      - eurekaMs 
+      - eurekaMs
       - mysql-db
     container_name: gateway-service 
 
@@ -35,7 +35,7 @@ services:
     ports:
       - "8088:8088"
     depends_on:
-      - eurekaMs 
+      - eurekaMs
       - mysql-db
     container_name: user-service
 
@@ -44,7 +44,7 @@ services:
     ports:
       - "8082:8082"
     depends_on:
-      - eurekaMs 
+      - eurekaMs
       - mysql-db
     container_name: agent-service
 
@@ -62,7 +62,7 @@ services:
     ports:
       - "8081:8081"
     depends_on:
-      - eurekaMs 
+      - eurekaMs
       - mysql-db
     container_name: equipement-service
 
@@ -71,7 +71,7 @@ services:
     ports:
       - "8084:8084"
     depends_on:
-      - eurekaMs 
+      - eurekaMs
       - mysql-db
     container_name: logiciel-service
 
@@ -80,7 +80,7 @@ services:
     ports:
       - "8083:8083"
     depends_on:
-      - eurekaMs 
+      - eurekaMs
       - mysql-db
     container_name: maintenance-service
 
@@ -89,7 +89,7 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - eurekaMs 
+      - eurekaMs
       - mysql-db
     container_name: ocr-service
 
