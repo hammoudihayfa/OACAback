@@ -51,7 +51,7 @@ jobs:
         for SERVICE in $SERVICES; do
           echo "Running SonarQube analysis for $SERVICE"
           cd $SERVICE
-          ./mvnw sonar:sonar -Dsonar.login=$SONAR_TOKEN
+          ./mvnw sonar:sonar -Dsonar.login=$SONAR_TOKEN -Dsonar.host.url=http://localhost:9000
           cd ..
         done
 
