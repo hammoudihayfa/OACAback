@@ -9,10 +9,11 @@ on:
 env:
   USER_SERVICE_IMAGE: hammoudihayfa/user-service:latest
   MAINTENANCE_SERVICE_IMAGE: hammoudihayfa/maintenance-service:latest
-  EUREKA_SERVICE_IMAGE: hammoudihayfa/eurekams:latest
+  EUREKA_SERVICE_IMAGE: hammoudihayfa/eureka-service:latest
   EMAIL_SERVICE_IMAGE: hammoudihayfa/email-service:latest
-  APIGATEWAY_SERVICE_IMAGE: hammoudihayfa/apigateway:latest
-  OCR_SERVICE_IMAGE: hammoudihayfa/ocr-service:latest
+  # Corrected to lowercase: APIGATEWAY_SERVICE_IMAGE
+  APIGATEWAY_SERVICE_IMAGE: hammoudihayfa/apigateway-service:latest
+  OCR_SERVICE_IMAGE: hammoudihayfa/ocr_service:latest
   LOGICIEL_SERVICE_IMAGE: hammoudihayfa/logiciel-service:latest
   EQUIPEMENT_SERVICE_IMAGE: hammoudihayfa/equipement-service:latest
   AGENT_SERVICE_IMAGE: hammoudihayfa/agent-service:latest
@@ -35,7 +36,8 @@ jobs:
 
     - name: Build & Test Microservices
       run: |
-        SERVICES="user-service maintenance-service eurekams email-service apigateway ocr-service logiciel-service equipement-service agent-service"
+        # Corrected 'eurekams' to 'eurekaMs' to match actual folder name casing
+        SERVICES="user-service maintenance-service eurekaMs email-service apigateway ocr_service logiciel-service equipement-service agent-service"
         for SERVICE in $SERVICES; do
           echo "Building $SERVICE..."
           cd $SERVICE
@@ -48,9 +50,15 @@ jobs:
     - name: Verify compiled binaries paths
       run: |
         echo "Listing contents of target/classes directories:"
-        for SERVICE in user-service maintenance-service eurekams email-service apigateway ocr-service logiciel-service equipement-service agent-service; do
-          ls -R $SERVICE/target/classes || echo "$SERVICE/target/classes not found or empty"
-        done
+        ls -R user-service/target/classes || echo "user-service/target/classes not found or empty"
+        ls -R maintenance-service/target/classes || echo "maintenance-service/target/classes not found or empty"
+        ls -R eurekaMs/target/classes || echo "eurekaMs/target/classes not found or empty"
+        ls -R email-service/target/classes || echo "email-service/target/classes not found or empty"
+        ls -R apiGateway/target/classes || echo "apiGateway/target/classes not found or empty"
+        ls -R ocr_service/target/classes || echo "ocr_service/target/classes not found or empty"
+        ls -R logiciel-service/target/classes || echo "logiciel-service/target/classes not found or empty"
+        ls -R equipement-service/target/classes || echo "equipement-service/target/classes not found or empty"
+        ls -R agent-service/target/classes || echo "agent-service/target/classes not found or empty"
         echo "End of target/classes verification."
 
     - name: SonarCloud Analysis
@@ -62,7 +70,7 @@ jobs:
         args: >
           -Dsonar.projectKey=hammoudihayfa_OACAback
           -Dsonar.organization=hammoudihayfa
-          -Dsonar.java.binaries=ocr-service/target/classes,logiciel-service/target/classes,user-service/target/classes,maintenance-service/target/classes,apigateway/target/classes,email-service/target/classes,equipement-service/target/classes,agent-service/target/classes,eurekams/target/classes
+          -Dsonar.java.binaries=ocr_service/target/classes,logiciel-service/target/classes,user-service/target/classes,maintenance-service/target/classes,apiGateway/target/classes,email-service/target/classes,equipement-service/target/classes,agent-service/target/classes,eurekaMs/target/classes
           -Dsonar.host.url=https://sonarcloud.io
 
     - name: Login to Docker Hub
@@ -76,10 +84,10 @@ jobs:
         declare -A IMAGES=(
           [user-service]=$USER_SERVICE_IMAGE
           [maintenance-service]=$MAINTENANCE_SERVICE_IMAGE
-          [eurekams]=$EUREKA_SERVICE_IMAGE
+          [eurekaMs]=$EUREKA_SERVICE_IMAGE
           [email-service]=$EMAIL_SERVICE_IMAGE
           [apigateway]=$APIGATEWAY_SERVICE_IMAGE
-          [ocr-service]=$OCR_SERVICE_IMAGE
+          [ocr_service]=$OCR_SERVICE_IMAGE
           [logiciel-service]=$LOGICIEL_SERVICE_IMAGE
           [equipement-service]=$EQUIPEMENT_SERVICE_IMAGE
           [agent-service]=$AGENT_SERVICE_IMAGE
@@ -87,8 +95,8 @@ jobs:
         for SERVICE_DIR in "${!IMAGES[@]}"; do
           IMAGE=${IMAGES[$SERVICE_DIR]}
           echo "Building Docker image for $SERVICE_DIR -> $IMAGE"
-          docker build -t "$IMAGE" "$SERVICE_DIR"
-          docker push "$IMAGE"
+          docker build -t $IMAGE $SERVICE_DIR
+          docker push $IMAGE
         done
 
     - name: Install Docker Compose
