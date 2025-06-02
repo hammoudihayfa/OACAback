@@ -24,9 +24,8 @@ jobs:
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v3
-      # Ajoutez cette ligne pour permettre l'analyse de l'historique Git par SonarQube
       with:
-        fetch-depth: 0 
+        fetch-depth: 0 # Nécessaire pour l'analyse SonarQube de l'historique Git
 
     - name: Set up JDK 17
       uses: actions/setup-java@v3
@@ -46,43 +45,52 @@ jobs:
           cd ..
         done
 
-    # --- Section modifiée pour SonarQube ---
+    ---
+    # --- Section SonarQube optimisée ---
+    # Utilisez cette seule étape pour SonarQube.
+    # L'action `sonarqube-scan-action` doit être capable de gérer les projets Maven automatiquement.
     - name: SonarQube Analysis
-      uses: SonarSource/sonarcloud-github-action@master # Ou @v2 si vous utilisez SonarCloud
+      uses: SonarSource/sonarqube-scan-action@v5.0.0 # Utilisez la version recommandée
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Fourni automatiquement par GitHub
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}    # Votre token SonarQube créé et stocké en secret
       with:
-        # Indique le chemin vers le fichier pom.xml de chaque service.
-        # Vous devrez exécuter l'action SonarCloud pour chaque service.
-        projectBaseDir: . # Le répertoire de base du projet (le répertoire où se trouve le pom.xml principal si vous avez un projet multi-modules)
-        # Si vous avez un projet multi-modules et que vous voulez analyser chaque module séparément, vous pouvez faire ceci:
-        # SonarCloud s'attend à être exécuté au niveau du projet parent pour un projet multi-modules.
-        # Si vous analysez chaque service comme un projet SonarQube distinct, vous devrez répéter cette étape pour chaque service.
-        # C'est plus propre de le faire au niveau du projet parent si tous les services font partie du même projet SonarQube.
-        # Pour une analyse par service, vous devriez appeler l'action dans une boucle ou pour chaque service.
+        # Ici, vous configurez l'action. Elle va chercher les fichiers pom.xml
+        # et exécuter l'analyse. Pour des projets multi-modules comme les microservices,
+        # il est souvent préférable de la lancer à la racine du dépôt si un pom.xml parent existe.
+        # Si chaque service est un projet SonarQube distinct, vous devrez boucler.
+        # Pour cet exemple, je vais simplifier en supposant un projet SonarQube "global" ou une analyse par défaut.
+        args: >
+          -Dsonar.projectKey=mon-mono-repo-sonarqube-project # Remplacez par la clé de votre projet SonarQube global ou principal
+          -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} # Assurez-vous d'avoir ce secret configuré !
+          -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }} # Configurez ce secret si vous utilisez une organisation
+          # Vous pouvez ajouter d'autres propriétés comme sonar.sources, sonar.java.binaries, etc., si l'auto-détection ne fonctionne pas
+          # -Dsonar.sources=./src
+          # -Dsonar.java.binaries=./target/classes
 
-        # Voici un exemple si vous voulez analyser chaque service séparément:
-        # Assurez-vous que chaque service est un projet SonarQube distinct configuré sur votre serveur SonarQube.
-    - name: SonarQube Analysis for Microservices
-      env:
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Nécessaire pour la décoration des pull requests
-      run: |
-        SERVICES="apiGateway email-service eurekaMs maintenance-service user-service logiciel-service agent-service equipement-service"
-        for SERVICE in $SERVICES; do
-          echo "Running SonarQube analysis for $SERVICE"
-          cd $SERVICE
-          # Utilisation de l'action SonarScanner pour Maven directement, mais en pointant vers votre SonarQube externe
-          # Assurez-vous que votre serveur SonarQube est accessible depuis les runners GitHub Actions
-          ./mvnw sonar:sonar \
-            -Dsonar.projectKey=$SERVICE \
-            -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
-            -Dsonar.login=$SONAR_TOKEN \
-            -Dsonar.organization=votre-organisation-sonarqube # Ajoutez ceci si vous utilisez SonarCloud ou une version récente de SonarQube avec des organisations
-          cd ..
-        done
-    # --- Fin de la section modifiée pour SonarQube ---
+    # Si vous devez absolument analyser chaque microservice comme un projet SonarQube distinct,
+    # vous devrez adapter l'action ou revenir à l'approche `mvnw sonar:sonar` par boucle,
+    # mais en supprimant l'action `sonarcloud-github-action` du dessus.
+    # Voici comment le faire avec la boucle `mvnw sonar:sonar` (si `sonarqube-scan-action` ne convient pas pour votre cas multi-projets)
+    # Dans ce cas, REMPLACEZ l'étape "SonarQube Analysis" ci-dessus par celle-ci :
+    #- name: SonarQube Analysis for Microservices
+    #  env:
+    #    SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #  run: |
+    #    SERVICES="apiGateway email-service eurekaMs maintenance-service user-service logiciel-service agent-service equipement-service"
+    #    for SERVICE in $SERVICES; do
+    #      echo "Running SonarQube analysis for $SERVICE"
+    #      cd $SERVICE
+    #      ./mvnw sonar:sonar \
+    #        -Dsonar.projectKey=$SERVICE \
+    #        -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
+    #        -Dsonar.login=$SONAR_TOKEN \
+    #        -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
+    #      cd ..
+    #    done
+    # --- Fin de la section SonarQube optimisée ---
+    ---
 
     - name: Login to Docker Hub
       uses: docker/login-action@v2
