@@ -7,7 +7,7 @@ on:
     branches: [ "main", "master" ]
 
 env:
-  # Images pour Docker Hub (vos images actuelles)
+  # Images Docker Hub
   USER_SERVICE_IMAGE: hammoudihayfa/user-service:latest
   MAINTENANCE_SERVICE_IMAGE: hammoudihayfa/maintenance-service:latest
   EUREKA_SERVICE_IMAGE: hammoudihayfa/eureka-service:latest
@@ -18,22 +18,16 @@ env:
   EQUIPEMENT_SERVICE_IMAGE: hammoudihayfa/equipement-service:latest
   AGENT_SERVICE_IMAGE: hammoudihayfa/agent-service:latest
 
-  # --- Nouvelles variables d'environnement pour GitHub Container Registry (GHCR) ---
-  GHCR_REGISTRY: ghcr.io
-  GHCR_OWNER: hammoudihayfa # Votre nom d'utilisateur GitHub
-  GHCR_REPO: OACAback # Le nom de votre dépôt GitHub
-
-  # Définir les noms complets des images GHCR (ajustés pour la cohérence des noms de service)
+  # GHCR images
   GHCR_USER_SERVICE_IMAGE: ghcr.io/hammoudihayfa/oacaback/user-service:latest
   GHCR_MAINTENANCE_SERVICE_IMAGE: ghcr.io/hammoudihayfa/oacaback/maintenance-service:latest
-  GHCR_EUREKA_SERVICE_IMAGE: ghcr.io/hammoudihayfa/oacaback/eureka-service:latest # Changé de 'eureakams' pour être cohérent
+  GHCR_EUREKA_SERVICE_IMAGE: ghcr.io/hammoudihayfa/oacaback/eureka-service:latest
   GHCR_EMAIL_SERVICE_IMAGE: ghcr.io/hammoudihayfa/oacaback/email-service:latest
-  GHCR_APIGATEWAY_SERVICE_IMAGE: ghcr.io/hammoudihayfa/oacaback/apigateway-service:latest # Changé de 'apigateway' pour être cohérent
+  GHCR_APIGATEWAY_SERVICE_IMAGE: ghcr.io/hammoudihayfa/oacaback/apigateway-service:latest
   GHCR_OCR_SERVICE_IMAGE: ghcr.io/hammoudihayfa/oacaback/ocr_service:latest
   GHCR_LOGICIEL_SERVICE_IMAGE: ghcr.io/hammoudihayfa/oacaback/logiciel-service:latest
   GHCR_EQUIPEMENT_SERVICE_IMAGE: ghcr.io/hammoudihayfa/oacaback/equipement-service:latest
   GHCR_AGENT_SERVICE_IMAGE: ghcr.io/hammoudihayfa/oacaback/agent-service:latest
-
 
 jobs:
   build-and-deploy:
@@ -53,7 +47,7 @@ jobs:
 
     - name: Build & Test Microservices
       run: |
-        SERVICES="user-service maintenance-service eurekaMs email-service apiGateway ocr_service logiciel-service equipement-service agent-service"
+        SERVICES="user-service maintenance-service eureka-service email-service apigateway ocr_service logiciel-service equipement-service agent-service"
         for SERVICE in $SERVICES; do
           echo "Building $SERVICE..."
           cd $SERVICE
@@ -65,16 +59,11 @@ jobs:
 
     - name: Verify compiled binaries paths
       run: |
-        echo "Listing contents of target/classes directories:"
-        ls -R user-service/target/classes || echo "user-service/target/classes not found or empty"
-        ls -R maintenance-service/target/classes || echo "maintenance-service/target/classes not found or empty"
-        ls -R eurekaMs/target/classes || echo "eurekaMs/target/classes not found or empty"
-        ls -R email-service/target/classes || echo "email-service/target/classes not found or empty"
-        ls -R apiGateway/target/classes || echo "apiGateway/target/classes not found or empty"
-        ls -R ocr_service/target/classes || echo "ocr_service/target/classes not found or empty"
-        ls -R logiciel-service/target/classes || echo "logiciel-service/target/classes not found or empty"
-        ls -R equipement-service/target/classes || echo "equipement-service/target/classes not found or empty"
-        ls -R agent-service/target/classes || echo "agent-service/target/classes not found or empty"
+        SERVICES="user-service maintenance-service eureka-service email-service apigateway ocr_service logiciel-service equipement-service agent-service"
+        for SERVICE in $SERVICES; do
+          echo "Listing contents of $SERVICE/target/classes:"
+          ls -R $SERVICE/target/classes || echo "$SERVICE/target/classes not found or empty"
+        done
 
     - name: SonarCloud Analysis
       uses: SonarSource/sonarqube-scan-action@v5.0.0
@@ -85,7 +74,7 @@ jobs:
         args: >
           -Dsonar.projectKey=hammoudihayfa_OACAback
           -Dsonar.organization=hammoudihayfa
-          -Dsonar.java.binaries=ocr_service/target/classes,logiciel-service/target/classes,user-service/target/classes,maintenance-service/target/classes,apiGateway/target/classes,email-service/target/classes,equipement-service/target/classes,agent-service/target/classes,eurekaMs/target/classes
+          -Dsonar.java.binaries=user-service/target/classes,maintenance-service/target/classes,eureka-service/target/classes,email-service/target/classes,apigateway/target/classes,ocr_service/target/classes,logiciel-service/target/classes,equipement-service/target/classes,agent-service/target/classes
           -Dsonar.host.url=https://sonarcloud.io
 
     - name: Login to Docker Hub
@@ -106,9 +95,9 @@ jobs:
         declare -A DOCKER_HUB_IMAGES=(
           [user-service]=$USER_SERVICE_IMAGE
           [maintenance-service]=$MAINTENANCE_SERVICE_IMAGE
-          [eurekaMs]=$EUREKA_SERVICE_IMAGE
+          [eureka-service]=$EUREKA_SERVICE_IMAGE
           [email-service]=$EMAIL_SERVICE_IMAGE
-          [apiGateway]=$APIGATEWAY_SERVICE_IMAGE
+          [apigateway]=$APIGATEWAY_SERVICE_IMAGE
           [ocr_service]=$OCR_SERVICE_IMAGE
           [logiciel-service]=$LOGICIEL_SERVICE_IMAGE
           [equipement-service]=$EQUIPEMENT_SERVICE_IMAGE
@@ -118,9 +107,9 @@ jobs:
         declare -A GHCR_IMAGES=(
           [user-service]=$GHCR_USER_SERVICE_IMAGE
           [maintenance-service]=$GHCR_MAINTENANCE_SERVICE_IMAGE
-          [eurekaMs]=$GHCR_EUREKA_SERVICE_IMAGE
+          [eureka-service]=$GHCR_EUREKA_SERVICE_IMAGE
           [email-service]=$GHCR_EMAIL_SERVICE_IMAGE
-          [apiGateway]=$GHCR_APIGATEWAY_SERVICE_IMAGE
+          [apigateway]=$GHCR_APIGATEWAY_SERVICE_IMAGE
           [ocr_service]=$GHCR_OCR_SERVICE_IMAGE
           [logiciel-service]=$GHCR_LOGICIEL_SERVICE_IMAGE
           [equipement-service]=$GHCR_EQUIPEMENT_SERVICE_IMAGE
@@ -165,3 +154,12 @@ jobs:
         echo "${KUBECONFIG_BASE64}" | base64 -d > ~/.kube/config
         chmod 600 ~/.kube/config
         echo "Kubeconfig configured."
+
+    - name: Deploy to Kubernetes cluster
+      run: |
+        for dir in k8s/*; do
+          if [ -d "$dir" ]; then
+            echo "Applying manifests in $dir"
+            kubectl apply -f "$dir"
+          fi
+        done
