@@ -13,7 +13,7 @@ env:
   EUREKA_SERVICE_IMAGE: hammoudihayfa/eureka-service:latest
   EMAIL_SERVICE_IMAGE: hammoudihayfa/email-service:latest
   APIGATEWAY_SERVICE_IMAGE: hammoudihayfa/apigateway-service:latest
-  OCR_SERVICE_IMAGE: hammoudihayfa/ocr-service:latest
+  OCR_SERVICE_IMAGE: hammoudihayfa/ocr_service:latest
   LOGICIEL_SERVICE_IMAGE: hammoudihayfa/logiciel-service:latest
   EQUIPEMENT_SERVICE_IMAGE: hammoudihayfa/equipement-service:latest
   AGENT_SERVICE_IMAGE: hammoudihayfa/agent-service:latest
@@ -23,13 +23,13 @@ env:
   GHCR_OWNER: hammoudihayfa
   GHCR_REPO: oacaback
 
-  # Noms complets des images GHCR
+  # Noms complets des images GHCR (ajustés pour la cohérence des noms de service)
   GHCR_USER_SERVICE_IMAGE: ghcr.io/hammoudihayfa/oacaback/user-service:latest
   GHCR_MAINTENANCE_SERVICE_IMAGE: ghcr.io/hammoudihayfa/oacaback/maintenance-service:latest
   GHCR_EUREKA_SERVICE_IMAGE: ghcr.io/hammoudihayfa/oacaback/eureka-service:latest
   GHCR_EMAIL_SERVICE_IMAGE: ghcr.io/hammoudihayfa/oacaback/email-service:latest
   GHCR_APIGATEWAY_SERVICE_IMAGE: ghcr.io/hammoudihayfa/oacaback/apigateway-service:latest
-  GHCR_OCR_SERVICE_IMAGE: ghcr.io/hammoudihayfa/oacaback/ocr-service:latest
+  GHCR_OCR_SERVICE_IMAGE: ghcr.io/hammoudihayfa/oacaback/ocr_service:latest
   GHCR_LOGICIEL_SERVICE_IMAGE: ghcr.io/hammoudihayfa/oacaback/logiciel-service:latest
   GHCR_EQUIPEMENT_SERVICE_IMAGE: ghcr.io/hammoudihayfa/oacaback/equipement-service:latest
   GHCR_AGENT_SERVICE_IMAGE: ghcr.io/hammoudihayfa/oacaback/agent-service:latest
@@ -47,12 +47,12 @@ jobs:
     - name: Set up JDK 17
       uses: actions/setup-java@v3
       with:
-        distribution: temurin
-        java-version: 17
+        distribution: 'temurin'
+        java-version: '17'
 
     - name: Build & Test Microservices
       run: |
-        SERVICES="user-service maintenance-service eureka-service email-service apigateway-service ocr-service logiciel-service equipement-service agent-service"
+        SERVICES="user-service maintenance-service eurekaMs email-service apiGateway ocr_service logiciel-service equipement-service agent-service"
         for SERVICE in $SERVICES; do
           echo "Building $SERVICE..."
           cd $SERVICE
@@ -65,7 +65,7 @@ jobs:
     - name: Verify compiled binaries paths
       run: |
         echo "Listing contents of target/classes directories:"
-        for SERVICE in user-service maintenance-service eureka-service email-service apigateway-service ocr-service logiciel-service equipement-service agent-service; do
+        for SERVICE in user-service maintenance-service eurekaMs email-service apiGateway ocr_service logiciel-service equipement-service agent-service; do
           ls -R $SERVICE/target/classes || echo "$SERVICE/target/classes not found or empty"
         done
 
@@ -76,9 +76,9 @@ jobs:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       with:
         args: >
-          -Dsonar.projectKey=hammoudihayfa_oacaback
+          -Dsonar.projectKey=hammoudihayfa_OACAback
           -Dsonar.organization=hammoudihayfa
-          -Dsonar.java.binaries=user-service/target/classes,maintenance-service/target/classes,eureka-service/target/classes,email-service/target/classes,apigateway-service/target/classes,ocr-service/target/classes,logiciel-service/target/classes,equipement-service/target/classes,agent-service/target/classes
+          -Dsonar.java.binaries=user-service/target/classes,maintenance-service/target/classes,eurekaMs/target/classes,email-service/target/classes,apiGateway/target/classes,ocr_service/target/classes,logiciel-service/target/classes,equipement-service/target/classes,agent-service/target/classes
           -Dsonar.host.url=https://sonarcloud.io
 
     - name: Login to Docker Hub
@@ -99,10 +99,10 @@ jobs:
         declare -A DOCKER_HUB_IMAGES=(
           [user-service]=$USER_SERVICE_IMAGE
           [maintenance-service]=$MAINTENANCE_SERVICE_IMAGE
-          [eureka-service]=$EUREKA_SERVICE_IMAGE
+          [eurekaMs]=$EUREKA_SERVICE_IMAGE
           [email-service]=$EMAIL_SERVICE_IMAGE
-          [apigateway-service]=$APIGATEWAY_SERVICE_IMAGE
-          [ocr-service]=$OCR_SERVICE_IMAGE
+          [apiGateway]=$APIGATEWAY_SERVICE_IMAGE
+          [ocr_service]=$OCR_SERVICE_IMAGE
           [logiciel-service]=$LOGICIEL_SERVICE_IMAGE
           [equipement-service]=$EQUIPEMENT_SERVICE_IMAGE
           [agent-service]=$AGENT_SERVICE_IMAGE
@@ -111,10 +111,10 @@ jobs:
         declare -A GHCR_IMAGES=(
           [user-service]=$GHCR_USER_SERVICE_IMAGE
           [maintenance-service]=$GHCR_MAINTENANCE_SERVICE_IMAGE
-          [eureka-service]=$GHCR_EUREKA_SERVICE_IMAGE
+          [eurekaMs]=$GHCR_EUREKA_SERVICE_IMAGE
           [email-service]=$GHCR_EMAIL_SERVICE_IMAGE
-          [apigateway-service]=$GHCR_APIGATEWAY_SERVICE_IMAGE
-          [ocr-service]=$GHCR_OCR_SERVICE_IMAGE
+          [apiGateway]=$GHCR_APIGATEWAY_SERVICE_IMAGE
+          [ocr_service]=$GHCR_OCR_SERVICE_IMAGE
           [logiciel-service]=$GHCR_LOGICIEL_SERVICE_IMAGE
           [equipement-service]=$GHCR_EQUIPEMENT_SERVICE_IMAGE
           [agent-service]=$GHCR_AGENT_SERVICE_IMAGE
