@@ -7,7 +7,6 @@ on:
     branches: [ "main", "master" ]
 
 env:
-  # Images pour Docker Hub (vos images actuelles)
   USER_SERVICE_IMAGE: hammoudihayfa/user-service:latest
   MAINTENANCE_SERVICE_IMAGE: hammoudihayfa/maintenance-service:latest
   EUREKA_SERVICE_IMAGE: hammoudihayfa/eureka-service:latest
@@ -18,12 +17,10 @@ env:
   EQUIPEMENT_SERVICE_IMAGE: hammoudihayfa/equipement-service:latest
   AGENT_SERVICE_IMAGE: hammoudihayfa/agent-service:latest
 
-  # --- Nouvelles variables d'environnement pour GitHub Container Registry (GHCR) ---
   GHCR_REGISTRY: ghcr.io
   GHCR_OWNER: hammoudihayfa
   GHCR_REPO: oacaback
 
-  # Noms complets des images GHCR (ajustés pour la cohérence des noms de service)
   GHCR_USER_SERVICE_IMAGE: ghcr.io/hammoudihayfa/oacaback/user-service:latest
   GHCR_MAINTENANCE_SERVICE_IMAGE: ghcr.io/hammoudihayfa/oacaback/maintenance-service:latest
   GHCR_EUREKA_SERVICE_IMAGE: ghcr.io/hammoudihayfa/oacaback/eureka-service:latest
